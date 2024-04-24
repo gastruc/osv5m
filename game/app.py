@@ -155,19 +155,18 @@ def geoscore(d):
 
 def compute_scores(csv_file):
     df = pd.read_csv(csv_file)
-    if True: #'accuracy_country' not in df.columns:
+    if 'accuracy_country' not in df.columns:
         print('Computing scores... (this may take a while)')
         geocoders = rg.search([(row.true_lat, row.true_lon) for row in df.itertuples(name='Pandas')])
         df['city'] = [geocoder['name'] for geocoder in geocoders]
         df['area'] = [geocoder['admin2'] for geocoder in geocoders]
         df['region'] = [geocoder['admin1'] for geocoder in geocoders]
         df['country'] = [geocoder['cc'] for geocoder in geocoders]
-        print(list(zip((geocoders['cc']), [(row.true_lat, row.true_lon) for row in df.itertuples(name='Pandas')])))
 
-        df['city_val'] = df['city'].apply(lambda x: 0 if pd.isna(x) else 1)
-        df['area_val'] = df['area'].apply(lambda x: 0 if pd.isna(x) else 1)
-        df['region_val'] = df['region'].apply(lambda x: 0 if pd.isna(x) else 1)
-        df['country_val'] = df['country'].apply(lambda x: 0 if pd.isna(x) else 1)
+        df['city_val'] = df['city'].apply(lambda x: 0 if pd.isna(x) or x == 'nan' else 1)
+        df['area_val'] = df['area'].apply(lambda x: 0 if pd.isna(x) or x == 'nan' else 1)
+        df['region_val'] = df['region'].apply(lambda x: 0 if pd.isna(x) or x == 'nan' else 1)
+        df['country_val'] = df['country'].apply(lambda x: 0 if pd.isna(x) or x == 'nan' else 1)
 
         df['distance'] = df.apply(lambda row: haversine(row['true_lat'], row['true_lon'], row['pred_lat'], row['pred_lon']), axis=1)
         df['score'] = df.apply(lambda row: geoscore(row['distance']), axis=1)
@@ -186,10 +185,10 @@ def compute_scores(csv_file):
         df['region_hit_base'] = [df['region'].iloc[i] != 'nan' and df['pred_region_base'].iloc[i] == df['region'].iloc[i] for i in range(len(df))]
         df['country_hit_base'] = [df['country'].iloc[i] != 'nan' and df['pred_country_base'].iloc[i] == df['country'].iloc[i] for i in range(len(df))]
 
-        df['accuracy_city_base'] = [(0 if df['city_val'].iloc[:i].sum() == 0 else df['city_hit_base'].iloc[:i].sum()/df['city_val'].iloc[:i].sum()) for i in range(len(df))]
-        df['accuracy_area_base'] = [(0 if df['area_val'].iloc[:i].sum() == 0 else df['area_hit_base'].iloc[:i].sum()/df['area_val'].iloc[:i].sum()) for i in range(len(df))]
-        df['accuracy_region_base'] = [(0 if df['region_val'].iloc[:i].sum() == 0 else df['region_hit_base'].iloc[:i].sum()/df['region_val'].iloc[:i].sum()) for i in range(len(df))]
-        df['accuracy_country_base'] = [(0 if df['country_val'].iloc[:i].sum() == 0 else df['country_hit_base'].iloc[:i].sum()/df['country_val'].iloc[:i].sum()) for i in range(len(df))]
+        df['accuracy_city_base'] = [(0 if df['city_val'].iloc[:i].sum() == 0 else df['city_hit_base'].iloc[:i].sum()/df['city_val'].iloc[:i].sum())*100 for i in range(len(df))]
+        df['accuracy_area_base'] = [(0 if df['area_val'].iloc[:i].sum() == 0 else df['area_hit_base'].iloc[:i].sum()/df['area_val'].iloc[:i].sum())*100 for i in range(len(df))]
+        df['accuracy_region_base'] = [(0 if df['region_val'].iloc[:i].sum() == 0 else df['region_hit_base'].iloc[:i].sum()/df['region_val'].iloc[:i].sum())*100 for i in range(len(df))]
+        df['accuracy_country_base'] = [(0 if df['country_val'].iloc[:i].sum() == 0 else df['country_hit_base'].iloc[:i].sum()/df['country_val'].iloc[:i].sum())*100 for i in range(len(df))]
 
         print('Computing geocoding accuracy (best)...')
         geocoders = rg.search([(row.pred_lat, row.pred_lon) for row in df.itertuples()])
@@ -203,10 +202,10 @@ def compute_scores(csv_file):
         df['region_hit'] = [df['region'].iloc[i] != 'nan' and df['pred_region'].iloc[i] == df['region'].iloc[i] for i in range(len(df))]
         df['country_hit'] = [df['country'].iloc[i] != 'nan' and df['pred_country'].iloc[i] == df['country'].iloc[i] for i in range(len(df))]
 
-        df['accuracy_city'] = [(0 if df['city_val'].iloc[:i].sum() == 0 else df['city_hit_base'].iloc[:i].sum()/df['city_val'].iloc[:i].sum()) for i in range(len(df))]
-        df['accuracy_area'] = [(0 if df['area_val'].iloc[:i].sum() == 0 else df['area_hit_base'].iloc[:i].sum()/df['area_val'].iloc[:i].sum()) for i in range(len(df))]
-        df['accuracy_region'] = [(0 if df['region_val'].iloc[:i].sum() == 0 else df['region_hit_base'].iloc[:i].sum()/df['region_val'].iloc[:i].sum()) for i in range(len(df))]
-        df['accuracy_country'] = [(0 if df['country_val'].iloc[:i].sum() == 0 else df['country_hit_base'].iloc[:i].sum()/df['country_val'].iloc[:i].sum()) for i in range(len(df))]
+        df['accuracy_city'] = [(0 if df['city_val'].iloc[:i].sum() == 0 else df['city_hit'].iloc[:i].sum()/df['city_val'].iloc[:i].sum())*100 for i in range(len(df))]
+        df['accuracy_area'] = [(0 if df['area_val'].iloc[:i].sum() == 0 else df['area_hit'].iloc[:i].sum()/df['area_val'].iloc[:i].sum())*100 for i in range(len(df))]
+        df['accuracy_region'] = [(0 if df['region_val'].iloc[:i].sum() == 0 else df['region_hit'].iloc[:i].sum()/df['region_val'].iloc[:i].sum())*100 for i in range(len(df))]
+        df['accuracy_country'] = [(0 if df['country_val'].iloc[:i].sum() == 0 else df['country_hit'].iloc[:i].sum()/df['country_val'].iloc[:i].sum())*100 for i in range(len(df))]
         df.to_csv(csv_file, index=False)
 
 
@@ -322,11 +321,11 @@ class Engine(object):
         if which == 'human':
             avg_score = sum(self.stats['scores']) / len(self.stats['scores']) if self.stats['scores'] else 0
             avg_distance = sum(self.stats['distances']) / len(self.stats['distances']) if self.stats['distances'] else 0
-            avg_country_accuracy = (0 if self.df['country_val'].iloc[:i].sum() == 0 else sum(self.stats['country'])/self.df['country_val'].iloc[:i].sum())
+            avg_country_accuracy = (0 if self.df['country_val'].iloc[:i].sum() == 0 else sum(self.stats['country'])/self.df['country_val'].iloc[:i].sum())*100
             if all:
-                avg_city_accuracy = (0 if self.df['city_val'].iloc[:i].sum() == 0 else sum(self.stats['city'])/self.df['city_val'].iloc[:i].sum())
-                avg_area_accuracy = (0 if self.df['area_val'].iloc[:i].sum() == 0 else sum(self.stats['area'])/self.df['area_val'].iloc[:i].sum())
-                avg_region_accuracy = (0 if self.df['region_val'].iloc[:i].sum() == 0 else sum(self.stats['region'])/self.df['region_val'].iloc[:i].sum())
+                avg_city_accuracy = (0 if self.df['city_val'].iloc[:i].sum() == 0 else sum(self.stats['city'])/self.df['city_val'].iloc[:i].sum())*100
+                avg_area_accuracy = (0 if self.df['area_val'].iloc[:i].sum() == 0 else sum(self.stats['area'])/self.df['area_val'].iloc[:i].sum())*100
+                avg_region_accuracy = (0 if self.df['region_val'].iloc[:i].sum() == 0 else sum(self.stats['region'])/self.df['region_val'].iloc[:i].sum())*100
                 aux = [avg_city_accuracy, avg_area_accuracy, avg_region_accuracy]
         elif which == 'base':
             avg_score = np.mean(self.df[['score_base']].iloc[:i])
@@ -414,11 +413,11 @@ if __name__ == "__main__":
         state['clicked'] = True
         image, text, df = state['engine'].click(float(lon), float(lat), country)
         df = df.sort_values(by='GeoScore', ascending=False)
-        return gr.update(visible=False), gr.update(value=image, visible=True), gr.update(value=text), gr.update(value=df, visible=True)
+        return gr.update(visible=False), gr.update(value=image, visible=True), gr.update(value=text, visible=True), gr.update(value=df, visible=True)
 
     def exit_(state):
         df = state['engine'].finish()
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=text), gr.update(visible=False), gr.update(value=df, visible=True), gr.update(value="-1", visible=False), gr.update(text=f"<h1> Your stats on OSV-5M🌍 </h1>", visible=True), gr.update(text='<h3>Thanks for playing ❤️</h3>', visible=True)
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value='', visible=True), gr.update(value=text), gr.update(visible=False), gr.update(value=df, visible=True), gr.update(value="-1", visible=False), gr.update(text=f"<h1> Your stats on OSV-5M🌍 </h1>", visible=True), gr.update(text='<h3>Thanks for playing ❤️</h3>', visible=True)
 
     def next_(state):
         if state['clicked']:
@@ -427,9 +426,9 @@ if __name__ == "__main__":
             else:
                 image, text = state['engine'].next_image()
                 state['clicked'] = False
-                return gr.update(value=make_map_(), visible=True), gr.update(visible=False), gr.update(value=image), gr.update(value=text), gr.update(), gr.update(), gr.update(visible=False), gr.update(value="-1"), gr.update(), gr.update()
+                return gr.update(value=make_map_(), visible=True), gr.update(visible=False), gr.update(value=image), gr.update(value=text), gr.update(visible=False), gr.update(), gr.update(visible=False), gr.update(value="-1"), gr.update(), gr.update()
         else:
-            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
 
     def start(state):
         # create a unique random temporary name under CACHE_DIR
@@ -458,7 +457,6 @@ if __name__ == "__main__":
             gr.update(visible=True),
         )
 
- # 
     with gr.Blocks(css=css, head=space_js) as demo:
         state = gr.State({})
         rules = gr.Markdown(RULES, visible=True)
