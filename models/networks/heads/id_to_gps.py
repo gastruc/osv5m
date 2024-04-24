@@ -14,7 +14,7 @@ class IdToGPS(nn.Module):
             )
         else:
             self.id_to_gps = torch.load(id_to_gps)
-        self.unorm = UnormGPS()
+        #self.unorm = UnormGPS()
 
     def forward(self, x):
         """Mapping from country id to gps coordinates

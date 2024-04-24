@@ -16,7 +16,11 @@ class HybridHead(nn.Module):
 
         self.unorm = UnormGPS()
 
-        quadtree = pd.read_csv(quadtree_path)
+        if quadtree_path is not None:
+            quadtree = pd.read_csv(quadtree_path)
+            self.init_quadtree(quadtree)
+
+    def init_quadtree(self, quadtree):
         quadtree[["min_lat", "max_lat"]] /= 90.0
         quadtree[["min_lon", "max_lon"]] /= 180.0
         self.register_buffer(
@@ -81,7 +85,6 @@ class HybridHead(nn.Module):
             "reg": regression,
         }
 
-
 class HybridHeadCentroid(nn.Module):
     """Classification head followed by regression head for the network."""
 
@@ -92,24 +95,16 @@ class HybridHeadCentroid(nn.Module):
         self.scale_tanh = scale_tanh
 
         self.unorm = UnormGPS()
+        if quadtree_path is not None:
+            quadtree = pd.read_csv(quadtree_path)
+            self.init_quadtree(quadtree)
 
-        quadtree = pd.read_csv(quadtree_path)
+    def init_quadtree(self, quadtree):
         quadtree[["min_lat", "max_lat", "mean_lat"]] /= 90.0
         quadtree[["min_lon", "max_lon", "mean_lon"]] /= 180.0
-        self.register_buffer(
-            "cell_center",
-            torch.tensor(quadtree[["mean_lat", "mean_lon"]].values),
-        )
-        self.register_buffer(
-            "cell_size_up",
-            torch.tensor(quadtree[["max_lat", "max_lon"]].values)
-            - torch.tensor(quadtree[["mean_lat", "mean_lon"]].values),
-        )
-        self.register_buffer(
-            "cell_size_down",
-            torch.tensor(quadtree[["mean_lat", "mean_lon"]].values)
-            - torch.tensor(quadtree[["min_lat", "min_lon"]].values),
-        )
+        self.cell_center = torch.tensor(quadtree[["mean_lat", "mean_lon"]].values)
+        self.cell_size_up = torch.tensor(quadtree[["max_lat", "max_lon"]].values) - torch.tensor(quadtree[["mean_lat", "mean_lon"]].values)
+        self.cell_size_down = torch.tensor(quadtree[["mean_lat", "mean_lon"]].values) - torch.tensor(quadtree[["min_lat", "min_lon"]].values)
 
     def forward(self, x, gt_label):
         """Forward pass of the network.
@@ -117,6 +112,9 @@ class HybridHeadCentroid(nn.Module):
         """
         classification_logits = x[..., : self.final_dim]
         classification = classification_logits.argmax(dim=-1)
+        self.cell_size_up = self.cell_size_up.to(classification.device)
+        self.cell_center = self.cell_center.to(classification.device)
+        self.cell_size_down = self.cell_size_down.to(classification.device)
 
         regression = x[..., self.final_dim :]
 

@@ -4,3 +4,5 @@ mix: {
   hier_quad : 1.0,
   l2_hybrid : 1.0,
 }
+path: ${data_dir}
+num_devices: ${computer.devices}

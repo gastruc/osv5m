@@ -8,5 +8,6 @@ instance:
   backbone : ${model.network.backbone}
   mid: ${model.network.mid}
   head: ${model.network.head}
+  mode: ${mode}
 
 class_name: ${class_name}

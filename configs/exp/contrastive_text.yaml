@@ -7,6 +7,10 @@ defaults:
   - _self_
 
 model:
+  network:
+    backbone:
+      instance:
+        _target_: models.networks.backbones.CLIPText
   optimizer:
     optim:
       lr: 0.0002

@@ -5,4 +5,4 @@ instance:
   final_dim: ${num_classes}
   use_tanh: true
   scale_tanh: 1.2
-  quadtree_path: ${root_dir}/${class_name}.csv
+  quadtree_path: ${data_dir}/${class_name}.csv

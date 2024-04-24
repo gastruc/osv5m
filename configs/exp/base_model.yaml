@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - override /model: regression
+  - override /model/network/backbone: openclip_B_32
+  - _self_
+
+model:
+  name: base_model
+  optimizer:
+    optim:
+      lr: 0.0002
+      weight_decay: 0.0001
+
+is_baseline: false
+max_epochs: 30
+
+dataset:
+  global_batch_size: 2048

@@ -197,9 +197,7 @@ def main(cfg):
         coord, join(data_path, f"index_to_gps_quadtree_{cfg.depth}_{cfg.do_split}.pt")
     )
 
-    torch.save(
-        id_to_quad, join(data_path, f"id_to_quad_{cfg.depth}_{cfg.do_split}.pt")
-    )
+    torch.save(id_to_quad, join(data_path, f"id_to_quad_{cfg.depth}_{cfg.do_split}.pt"))
     # Overwrite test.csv and train.csv
     if cfg.overwrite_csv:
         df_train.to_csv(train_fp, index=False)

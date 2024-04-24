@@ -67,7 +67,8 @@ def collate_fn_streetclip(batch):
         dict: dictionary with keys "img", "gps", "idx" and optionally "label"
     """
     keys = list(batch[0].keys())
-    keys.remove("weight")
+    if "weight" in batch[0].keys():
+        keys.remove("weight")
     output = {}
     for key in [
         "idx",
@@ -97,7 +98,8 @@ def collate_fn_denstity(batch):
         dict: dictionary with keys "img", "gps", "idx" and optionally "label"
     """
     keys = list(batch[0].keys())
-    keys.remove("weight")
+    if "weight" in batch[0].keys():
+        keys.remove("weight")
     # Sample indices based on the weights
     weights = np.array([x["weight"] for x in batch])
     normalized_weights = weights / np.sum(weights)
@@ -132,7 +134,8 @@ def collate_fn_streetclip_denstity(batch):
         dict: dictionary with keys "img", "gps", "idx" and optionally "label"
     """
     keys = list(batch[0].keys())
-    keys.remove("weight")
+    if "weight" in batch[0].keys():
+        keys.remove("weight")
     # Sample indices based on the weights
     weights = np.array([x["weight"] for x in batch])
     normalized_weights = weights / np.sum(weights)
@@ -181,7 +184,8 @@ def collate_fn_contrastive_density(batch):
         dict: dictionary with keys "img", "gps", "idx" and optionally "label"
     """
     keys = list(batch[0].keys())
-    keys.remove("weight")
+    if "weight" in batch[0].keys():
+        keys.remove("weight")
     # Sample indices based on the weights
     weights = np.array([x["weight"] for x in batch])
     normalized_weights = weights / np.sum(weights)
@@ -248,9 +252,15 @@ class OpenWorld(Dataset):
         self.split = split
         self.image_folder = join(
             path,
-            ("train" if split == "val" else split),
+            'images',
             ("train" if split == "val" else split),
         )
+
+        self.dict_names = {}
+        for root, _, files in os.walk(self.image_folder):
+            for file in files:
+                self.dict_names[file] = os.path.join(root, file)
+
         self.is_baseline = is_baseline
         if self.aux:
             self.aux_data = {}
@@ -293,7 +303,7 @@ class OpenWorld(Dataset):
         """Returns a new dataset with the given split."""
         start_time = time.time()
         if split == "test":
-            df = pd.read_csv(join(self.path, "test", "test.csv"), dtype=self.csv_dtype)
+            df = pd.read_csv(join(self.path, "test.csv"), dtype=self.csv_dtype)
             # extract coord
             longitude = df["longitude"].values
             latitude = df["latitude"].values
@@ -309,7 +319,7 @@ class OpenWorld(Dataset):
             return df
         elif split == "select":
             df = pd.read_csv(
-                join(self.path, "test", "select.csv"), dtype=self.csv_dtype
+                join(self.path, "select.csv"), dtype=self.csv_dtype
             )
             # extract coord
             longitude = df["longitude"].values
@@ -327,11 +337,11 @@ class OpenWorld(Dataset):
         else:
             if len(self.suff) == 0:
                 df = pd.read_csv(
-                    join(self.path, "train", "train.csv"), dtype=self.csv_dtype
+                    join(self.path, "train.csv"), dtype=self.csv_dtype
                 )
             else:
                 df = pd.read_csv(
-                    join(self.path, "train", "train" + "_" + self.suff + ".csv"),
+                    join(self.path, "train" + "_" + self.suff + ".csv"),
                     dtype=self.csv_dtype,
                 )
 
@@ -376,7 +386,7 @@ class OpenWorld(Dataset):
         self.categories = sorted(
             pd.concat(
                 [
-                    pd.read_csv(join(self.path, split, f"{split}.csv"))[tag]
+                    pd.read_csv(join(self.path, f"{split}.csv"))[tag]
                     for split in splits
                 ]
             )
@@ -408,9 +418,9 @@ class OpenWorld(Dataset):
         """
         x = list(self.df.iloc[i])  # id, latitude, longitude, {category}
         if self.streetclip:
-            img = Image.open(join(self.image_folder, f"{int(x[0])}.jpg"))
+            img = Image.open(self.dict_names[f"{int(x[0])}.jpg"])
         elif self.blur:
-            img = transforms.ToTensor()(Image.open(join(self.image_folder, f"{int(x[0])}.jpg")))
+            img = transforms.ToTensor()(Image.open(self.dict_names[f"{int(x[0])}.jpg"]))
             u = GaussianBlur(kernel_size = 13, sigma=2.0)
             bottom_part = img[:, -14:, :].unsqueeze(0)
             blurred_bottom = u(bottom_part)
@@ -418,7 +428,7 @@ class OpenWorld(Dataset):
             img = self.transforms(transforms.ToPILImage()(img))
         else:
             img = self.transforms(
-                Image.open(join(self.image_folder, f"{int(x[0])}.jpg"))
+                Image.open(self.dict_names[f"{int(x[0])}.jpg"])
             )
             
         lat, lon = normalize(x[1], x[2])
@@ -461,7 +471,8 @@ class ContrastiveOpenWorld(OpenWorld):
         split="train",
         class_name=None,
         aux_data=[],
-        class_name2=None
+        class_name2=None,
+        blur=False,
     ):
         """
         class_name2 (str): if not None, we do contrastive an other class than the one specified for classif
@@ -472,6 +483,7 @@ class ContrastiveOpenWorld(OpenWorld):
             split=split,
             class_name=class_name,
             aux_data=aux_data,
+            blur=blur,
         )
         self.add_label = False
         if not(class_name2 is None) and split != 'test' and split != 'select':
@@ -500,12 +512,12 @@ class ContrastiveOpenWorld(OpenWorld):
             idx = random.choice(idxs)
             x = self.df.iloc[idx]
             pos_img = self.transforms(
-                Image.open(join(self.image_folder, f"{int(x['id'])}.jpg"))
+                Image.open(self.dict_names[f"{int(x['id'])}.jpg"])
             )
         else:
             pos_img = self.random_crop(
                 self.transforms(
-                    Image.open(join(self.image_folder, f"{int(x['id'])}.jpg"))
+                    Image.open(self.dict_names[f"{int(x['id'])}.jpg"])
                 )
             )
         return pos_img
@@ -523,7 +535,7 @@ class ContrastiveOpenWorld(OpenWorld):
         categories = sorted(
             pd.concat(
                 [
-                    pd.read_csv(join(self.path, split, f"{split}.csv"))[tag]
+                    pd.read_csv(join(self.path, f"{split}.csv"))[tag]
                     for split in splits
                 ]
             )
@@ -556,6 +568,7 @@ class TextContrastiveOpenWorld(OpenWorld):
         split="train",
         class_name=None,
         aux_data=[],
+        blur=False,
     ):
         super().__init__(
             path,
@@ -563,6 +576,7 @@ class TextContrastiveOpenWorld(OpenWorld):
             split=split,
             class_name=class_name,
             aux_data=aux_data,
+            blur=blur,
         )
         self.df = self.df.reset_index(drop=True)
 

@@ -3,7 +3,7 @@ defaults:
   - norm: groupnorm #instance_1d
 
 instance:
-  _target_: models.networks.mlp.MLPCentroid2
+  _target_: models.networks.mlp.MLPCentroid
   initial_dim: ${model.network.backbone.output_dim}
   hidden_dim:
     - ${model.network.backbone.output_dim}

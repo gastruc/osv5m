@@ -129,12 +129,46 @@ class NoFeatureBackbone(nn.Module):
 class ContrastiveFrozenBackbone(FrozenBackbone):
     """Freezes the backbone of a network."""
 
-    def __init__(self, backbone, mid, head):
+    def __init__(self, backbone, mid, head, mode):
         super().__init__(backbone, mid, head)
+        self.mode = mode
 
     def forward(self, x):
         with torch.no_grad():
             features = self.backbone(x)
+            if self.mode != "eval":
+                x_pos = {
+                    k.strip("pos_"): v.clone()
+                    if isinstance(v, torch.Tensor)
+                    else copy.deepcopy(v)
+                    for k, v in x.items()
+                    if k.startswith("pos_")
+                }
+                pos_features = self.backbone(x_pos)
+        x = self.mid(features)
+        x = self.head(x)
+        if self.mode != "eval":
+            return {
+                "features": features[:, 0, :],
+                "pos_features": pos_features[:, 0, :],
+                **x,
+            }
+        return {
+            "features": features[:, 0, :],
+            **x,
+        }
+
+
+class ContrastiveUnFrozenPartBackbone(UnfrozenPartBackbone):
+    """Freezes the backbone of a network."""
+
+    def __init__(self, backbone, mid, head, mode):
+        super().__init__(backbone, mid, head)
+        self.mode = mode
+
+    def forward(self, x):
+        features = self.backbone(x)
+        if self.mode != "eval":
             x_pos = {
                 k.strip("pos_"): v.clone()
                 if isinstance(v, torch.Tensor)
@@ -145,34 +179,14 @@ class ContrastiveFrozenBackbone(FrozenBackbone):
             pos_features = self.backbone(x_pos)
         x = self.mid(features)
         x = self.head(x)
+        if self.mode != "eval":
+            return {
+                "features": features[:, 0, :],
+                "pos_features": pos_features[:, 0, :],
+                **x,
+            }
         return {
             "features": features[:, 0, :],
-            "pos_features": pos_features[:, 0, :],
-            **x,
-        }
-
-
-class ContrastiveUnFrozenPartBackbone(UnfrozenPartBackbone):
-    """Freezes the backbone of a network."""
-
-    def __init__(self, backbone, mid, head):
-        super().__init__(backbone, mid, head)
-
-    def forward(self, x):
-        features = self.backbone(x)
-        x_pos = {
-            k.strip("pos_"): v.clone()
-            if isinstance(v, torch.Tensor)
-            else copy.deepcopy(v)
-            for k, v in x.items()
-            if k.startswith("pos_")
-        }
-        pos_features = self.backbone(x_pos)
-        x = self.mid(features)
-        x = self.head(x)
-        return {
-            "features": features[:, 0, :],
-            "pos_features": pos_features[:, 0, :],
             **x,
         }
 
@@ -180,24 +194,31 @@ class ContrastiveUnFrozenPartBackbone(UnfrozenPartBackbone):
 class ContrastiveUnFrozenBackbone(UnfrozenBackbone):
     """Freezes the backbone of a network."""
 
-    def __init__(self, backbone, mid, head):
+    def __init__(self, backbone, mid, head, mode):
         super().__init__(backbone, mid, head)
+        self.mode = mode
 
     def forward(self, x):
         features = self.backbone(x)
-        x_pos = {
-            k.strip("pos_"): v.clone()
-            if isinstance(v, torch.Tensor)
-            else copy.deepcopy(v)
-            for k, v in x.items()
-            if k.startswith("pos_")
-        }
-        pos_features = self.backbone(x_pos)
+        if self.mode != "eval":
+            x_pos = {
+                k.strip("pos_"): v.clone()
+                if isinstance(v, torch.Tensor)
+                else copy.deepcopy(v)
+                for k, v in x.items()
+                if k.startswith("pos_")
+            }
+            pos_features = self.backbone(x_pos)
         x = self.mid(features)
         x = self.head(x)
+        if self.mode != "eval":
+            return {
+                "features": features[:, 0, :],
+                "pos_features": pos_features[:, 0, :],
+                **x,
+            }
         return {
             "features": features[:, 0, :],
-            "pos_features": pos_features[:, 0, :],
             **x,
         }
 
@@ -280,27 +301,35 @@ class HybridUnfrozenBackbone(UnfrozenBackbone):
         x = self.head(x, gt_label)
         return x
 
+
 class ContrastiveHybridUnFrozenBackbone(UnfrozenBackbone):
     """Freezes the backbone of a network."""
 
-    def __init__(self, backbone, mid, head):
+    def __init__(self, backbone, mid, head, mode):
         super().__init__(backbone, mid, head)
+        self.mode = mode
 
     def forward(self, x):
         gt_label = x["label"] if self.training else None
         features = self.backbone(x)
-        x_pos = {
-            k.strip("pos_"): v.clone()
-            if isinstance(v, torch.Tensor)
-            else copy.deepcopy(v)
-            for k, v in x.items()
-            if k.startswith("pos_")
-        }
-        pos_features = self.backbone(x_pos)
+        if self.mode != "eval":
+            x_pos = {
+                k.strip("pos_"): v.clone()
+                if isinstance(v, torch.Tensor)
+                else copy.deepcopy(v)
+                for k, v in x.items()
+                if k.startswith("pos_")
+            }
+            pos_features = self.backbone(x_pos)
         x = self.mid(features)
         x = self.head(x, gt_label)
+        if self.mode != "eval":
+            return {
+                "features": features[:, 0, :],
+                "pos_features": pos_features[:, 0, :],
+                **x,
+            }
         return {
             "features": features[:, 0, :],
-            "pos_features": pos_features[:, 0, :],
             **x,
         }

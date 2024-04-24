@@ -3,3 +3,4 @@ mix: {
   MIL-NCE : 1.0,
   #L1 : 1.0,
 }
+num_devices: ${computer.devices}

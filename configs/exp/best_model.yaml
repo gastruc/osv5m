@@ -4,7 +4,7 @@ defaults:
   - override /dataset: openworld_contrastive_best
   - override /model: hybrid
   - override /model/network: best_backbone
-  - override /model/network/backbone: openclip_B_32
+  - override /model/network/backbone: clip_L_14_DataComp
   - override /model/network/mid: mlp_hybrid
   - override /model/loss: best_model
   - _self_
@@ -14,6 +14,7 @@ is_baseline: false
 max_epochs: 30
 
 model:
+  name: best_model
   optimizer:
     optim:
       lr: 2e-4

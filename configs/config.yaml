@@ -26,6 +26,7 @@ model:
       - 2500
     acc_area: ${areas}
     aux_data: ${aux_data}
+
 datamodule:
   _target_: data.datamodule.ImageDataModule
   train_dataset: ${dataset.train_dataset}

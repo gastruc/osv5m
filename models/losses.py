@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import numpy as np
+from os.path import join
 from models.networks.utils import NormGPS
 
 
@@ -70,15 +71,16 @@ class CrossEntropy(nn.Module):
         """
         return {"cross_entropy_loss": self.loss(x["label"], y["label"])}
 
+
 class HierarchicalCrossEntropyQuad(nn.Module):
-    def __init__(self):
+    def __init__(self, data_path=""):
         super(HierarchicalCrossEntropyQuad, self).__init__()
         self.dict_losses = {"classif_loss": nn.CrossEntropyLoss(reduction="none")}
-        for i in range (1,10):
+        for i in range(1, 10):
             self.dict_losses[f"quadtree_{i}_loss"] = nn.NLLLoss()
-        self.matrixes= torch.load("quadtree_matrixes.pt")
-        self.dicts = torch.load("quadtree_dicts.pt")
-        self.id_to_quad = torch.load('id_to_quad_10_1000.pt')
+        self.matrixes = torch.load(join(data_path, "quadtree_matrixes.pt"))
+        self.dicts = torch.load(join(data_path, "quadtree_dicts.pt"))
+        self.id_to_quad = torch.load(join(data_path, "id_to_quad_10_1000.pt"))
 
     def forward(self, x, y):
         """
@@ -89,26 +91,26 @@ class HierarchicalCrossEntropyQuad(nn.Module):
             torch.Tensor: Hierarchical CrossEntropy for Quadtrees loss between x and y: torch.Tensor([B])
         """
         out = {"classif_loss": self.dict_losses["classif_loss"](x["label"], y["label"])}
-        probas =  nn.functional.softmax(x["label"], dim=1)
+        probas = nn.functional.softmax(x["label"], dim=1)
         device = x["label"].device
         gt = self.id_to_quad[y["label"].cpu()]
-        for i in range (9):
-            logits = torch.log(
-                torch.mm(probas, self.matrixes[i].to(device)) + 1e-10
+        for i in range(9):
+            logits = torch.log(torch.mm(probas, self.matrixes[i].to(device)) + 1e-10)
+            l = [s[: 9 - i] if len(s) >= 10 - i else s for s in gt]
+            out[f"quadtree_{i+1}_loss"] = self.dict_losses[f"quadtree_{i+1}_loss"](
+                logits, torch.tensor([self.dicts[i][item] for item in l]).to(device)
             )
-            l = [s[:9 - i] if len(s) >= 10 - i else s for s in gt]
-            out[f"quadtree_{i+1}_loss"] = self.dict_losses[f"quadtree_{i+1}_loss"](logits, torch.tensor([self.dicts[i][item] for item in l]).to(device))
 
         return out
 
+
 class HierarchicalCrossEntropy(nn.Module):
-    def __init__(self):
+    def __init__(self, path=""):
         super(HierarchicalCrossEntropy, self).__init__()
         self.city_loss = nn.CrossEntropyLoss(reduction="none")
         self.country_loss = nn.NLLLoss()
         self.area_loss = nn.NLLLoss()
         self.region_loss = nn.NLLLoss()
-        path = ""
         self.city_to_country = torch.load(path + "city_to_country.pt")
         self.city_to_region = torch.load(path + "city_to_region.pt")
         self.city_to_area = torch.load(path + "city_to_area.pt")
@@ -169,7 +171,6 @@ class HierarchicalCrossEntropy(nn.Module):
             "cross_entropy_area_loss": self.area_loss(areas_logits, area_gt),
             "cross_entropy_region_loss": self.region_loss(regions_logits, region_gt),
         }
-
 
 
 class LandCoverLoss(nn.Module):
@@ -346,8 +347,9 @@ class InfoNCE(nn.Module):
 
 
 class TextNCE(nn.Module):
-    def __init__(self, tau=0.1):
+    def __init__(self, tau=0.1, num_devices=1):
         super(TextNCE, self).__init__()
+        self.distributed = num_devices > 1
         self.tau = tau
 
     def cosine_similarity(self, a, b, normalize=True):
@@ -364,13 +366,18 @@ class TextNCE(nn.Module):
         neg_sim: BxB
         pos_sim: Bx1
         """
-        all_image_features = torch.cat(
-            torch.distributed.nn.all_gather(x["features"]), dim=0
-        )
-        all_text_features = torch.cat(
-            torch.distributed.nn.all_gather(x["text_features"]), dim=0
-        )
-        all_labels = torch.cat(torch.distributed.nn.all_gather(y["label"]), dim=0)
+        if self.distributed:
+            all_image_features = torch.cat(
+                torch.distributed.nn.all_gather(x["features"]), dim=0
+            )
+            all_text_features = torch.cat(
+                torch.distributed.nn.all_gather(x["text_features"]), dim=0
+            )
+            all_labels = torch.cat(torch.distributed.nn.all_gather(y["label"]), dim=0)
+        else:
+            all_image_features = x["features"]
+            all_text_features = x["text_features"]
+            all_labels = y["label"]
         labels_u = torch.unique(all_labels)
         logits = self.cosine_similarity(
             all_image_features, all_text_features, normalize=True
@@ -396,8 +403,9 @@ class TextNCE(nn.Module):
 
 
 class MILNCE(nn.Module):
-    def __init__(self, tau=0.1):
+    def __init__(self, tau=0.1, num_devices=1):
         super(MILNCE, self).__init__()
+        self.distributed = num_devices > 1
         self.tau = tau
 
     def cosine_similarity(self, a, b, normalize=True):
@@ -413,13 +421,18 @@ class MILNCE(nn.Module):
         """
         COmpute MIL-NCE loss
         """
-        all_image_features = torch.cat(
-            torch.distributed.nn.all_gather(x["features"]), dim=0
-        )
-        all_pos_features = torch.cat(
-            torch.distributed.nn.all_gather(x["pos_features"]), dim=0
-        )
-        all_labels = torch.cat(torch.distributed.nn.all_gather(y["label"]), dim=0)
+        if self.distributed:
+            all_image_features = torch.cat(
+                torch.distributed.nn.all_gather(x["features"]), dim=0
+            )
+            all_pos_features = torch.cat(
+                torch.distributed.nn.all_gather(x["pos_features"]), dim=0
+            )
+            all_labels = torch.cat(torch.distributed.nn.all_gather(y["label"]), dim=0)
+        else:
+            all_image_features = x["features"]
+            all_pos_features = x["pos_features"]
+            all_labels = y["label"]
         labels_u = torch.unique(all_labels)
         features = torch.cat([all_image_features, all_pos_features])
         labels = torch.cat([all_labels, all_labels])
@@ -450,9 +463,11 @@ class MILNCE(nn.Module):
             "contrastive_loss": loss,
         }
 
+
 class RegionMILNCE(nn.Module):
-    def __init__(self, tau=0.1):
+    def __init__(self, tau=0.1, num_devices=1):
         super(RegionMILNCE, self).__init__()
+        self.distributed = num_devices > 1
         self.tau = tau
 
     def cosine_similarity(self, a, b, normalize=True):
@@ -469,13 +484,18 @@ class RegionMILNCE(nn.Module):
         neg_sim: BxB
         pos_sim: Bx1
         """
-        all_image_features = torch.cat(
-            torch.distributed.nn.all_gather(x["features"]), dim=0
-        )
-        all_pos_features = torch.cat(
-            torch.distributed.nn.all_gather(x["pos_features"]), dim=0
-        )
-        all_labels = torch.cat(torch.distributed.nn.all_gather(y["label_contrastive"]), dim=0)
+        if self.distributed:
+            all_image_features = torch.cat(
+                torch.distributed.nn.all_gather(x["features"]), dim=0
+            )
+            all_pos_features = torch.cat(
+                torch.distributed.nn.all_gather(x["pos_features"]), dim=0
+            )
+            all_labels = torch.cat(torch.distributed.nn.all_gather(y["label"]), dim=0)
+        else:
+            all_image_features = x["features"]
+            all_pos_features = x["pos_features"]
+            all_labels = y["label"]
         labels_u = torch.unique(all_labels)
         features = torch.cat([all_image_features, all_pos_features])
         labels = torch.cat([all_labels, all_labels])
@@ -503,8 +523,9 @@ class RegionMILNCE(nn.Module):
                 # Compute the MIL-NCE loss
                 loss += torch.sum(-torch.logsumexp(pos_logits / self.tau, dim=1))
         return {
-            "contrastive_loss": loss/len(all_labels),
+            "contrastive_loss": loss / len(all_labels),
         }
+
 
 LOSSES = {
     "l1": L1,
@@ -523,8 +544,8 @@ LOSSES = {
     "soil": SoilLoss,
     "dist_sea": DistSeaLoss,
     "hierarchical": HierarchicalCrossEntropy,
-    'hier_quad': HierarchicalCrossEntropyQuad,
-    'region_mil': RegionMILNCE
+    "hier_quad": HierarchicalCrossEntropyQuad,
+    "region_mil": RegionMILNCE,
 }
 AVERAGE = {False: lambda x: x, True: lambda x: x.mean(dim=-1)}
 
@@ -532,7 +553,7 @@ AVERAGE = {False: lambda x: x, True: lambda x: x.mean(dim=-1)}
 class Losses(nn.Module):
     """The Losses meta-object that can take a mix of losses."""
 
-    def __init__(self, mix={}, aux_data=[]):
+    def __init__(self, mix={}, aux_data=[], path="", num_devices=1):
         """Initializes the Losses object.
         Args:
             mix (dict): dictionary with keys "loss_name" and values weight
@@ -547,9 +568,9 @@ class Losses(nn.Module):
                 total.remove(col)
             for col in total:
                 del mix[col]
-        self.init_losses(mix)
+        self.init_losses(mix, path, num_devices)
 
-    def init_losses(self, mix):
+    def init_losses(self, mix, path="", num_devices=1):
         """Initializes the losses.
         Args:
             mix (dict): dictionary with keys "loss_name" and values weight
@@ -557,10 +578,21 @@ class Losses(nn.Module):
         self.loss = {}
         for m, v in mix.items():
             m = m.lower()
-            try:
-                self.loss[m] = (LOSSES[m](), v)
-            except KeyError:
-                raise KeyError(f"Loss {m} not found in {LOSSES.keys()}")
+            if m in ["hierarchical", "hier_quad"]:
+                try:
+                    self.loss[m] = (LOSSES[m](path), v)
+                except KeyError:
+                    raise KeyError(f"Loss {m} not found in {LOSSES.keys()}")
+            elif m in ["region_mil", "mil-nce", "text-nce"]:
+                try:
+                    self.loss[m] = (LOSSES[m](num_devices=num_devices), v)
+                except KeyError:
+                    raise KeyError(f"Loss {m} not found in {LOSSES.keys()}")
+            else:
+                try:
+                    self.loss[m] = (LOSSES[m](), v)
+                except KeyError:
+                    raise KeyError(f"Loss {m} not found in {LOSSES.keys()}")
 
     def forward(self, x, y, average=True):
         """Computes the losses.
