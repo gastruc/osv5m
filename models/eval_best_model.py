@@ -9,10 +9,8 @@ class EvalModule(L.LightningModule):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        #path = os.getcwd()
         os.chdir(cfg.network.root_dir)
         self.model = Geolocalizer.from_pretrained('osv5m/baseline')
-        #os.chdir(path)
         self.test_metrics = instantiate(cfg.test_metrics)
 
     def training_step(self, batch, batch_idx):
