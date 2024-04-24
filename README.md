@@ -37,7 +37,7 @@ gps = geolocalizer(x) # B, 2 (lat, lon - tensor in rad)
 In order to reproduce results for model on [huggingface](https://huggingface.co/osv5m/baseline), run:
 
 ```bash
-python eval_best_model.py exp=eval_best_model dataset.global_batch_size=1024
+python evaluation.py exp=eval_best_model dataset.global_batch_size=1024
 ```
 
 ## Benchmark 🛰️
