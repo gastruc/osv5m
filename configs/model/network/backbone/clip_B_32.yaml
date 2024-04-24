@@ -1,0 +1,6 @@
+instance:
+  _target_: models.networks.backbones.CLIP
+  path: openai/clip-vit-base-patch32
+
+
+output_dim: 768

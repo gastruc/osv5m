@@ -1,0 +1,11 @@
+_target_: models.losses.Losses
+mix: {
+  haversine : 0.0,
+  L1 : 1.0,
+  land_cover: 1.0,
+  drive_side: 1.0,
+  climate: 1.0,
+  soil: 1.0,
+  dist_sea: 1.0,
+}
+aux_data: ${aux_data}

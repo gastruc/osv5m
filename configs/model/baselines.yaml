@@ -1,0 +1,10 @@
+defaults:
+  - optimizer: none
+  - lr_scheduler: none
+  - network: baselines
+  - loss: mix
+  - _self_
+
+name: Baseline
+aux_data: ${aux_data}
+text_tuning: ${text_tuning}

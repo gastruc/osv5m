@@ -1,0 +1,13 @@
+defaults:
+  - activation: gelu
+  - norm: groupnorm #instance_1d
+
+instance:
+  _target_: models.networks.mlp.MLP
+  initial_dim: ${model.network.backbone.output_dim}
+  hidden_dim:
+    - ${model.network.backbone.output_dim}
+    - 64
+  final_dim: ${model.network.head.final_dim}
+  norm: ${model.network.mid.norm}
+  activation: ${model.network.mid.activation}

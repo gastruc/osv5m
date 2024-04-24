@@ -1,0 +1,4 @@
+_target_: models.losses.Losses
+mix: {
+  geoguessr : 1.0,
+}

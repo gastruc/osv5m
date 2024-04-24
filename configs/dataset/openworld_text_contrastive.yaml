@@ -1,0 +1,34 @@
+defaults:
+  - train_transform: fast_clip
+  - test_transform: fast_clip
+  - _self_
+
+name: OpenWorld_new
+global_batch_size: 256
+
+train_dataset:
+  _partial_: true
+  _target_: data.data.TextContrastiveOpenWorld
+  path: ${data_dir}/OpenWorld/
+  split: train
+  class_name: ${class_name}
+  transforms: ${dataset.train_transform}
+  blur: ${blur}
+
+val_dataset:
+  _partial_: true
+  _target_: data.data.TextContrastiveOpenWorld
+  path: ${data_dir}/OpenWorld/
+  split: val
+  class_name: ${class_name}
+  transforms: ${dataset.test_transform}
+  blur: ${blur}
+
+test_dataset:
+  _partial_: true
+  _target_: data.data.TextContrastiveOpenWorld
+  path: ${data_dir}/OpenWorld/
+  split: test
+  class_name: ${class_name}
+  transforms: ${dataset.test_transform}
+  blur: ${blur}

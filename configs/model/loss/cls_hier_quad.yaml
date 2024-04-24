@@ -1,0 +1,4 @@
+_target_: models.losses.Losses
+mix: {
+  hier_quad : 1.0,
+}

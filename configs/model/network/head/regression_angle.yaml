@@ -1,0 +1,4 @@
+target_key: gps
+final_dim:  4
+instance:
+  _target_: models.networks.heads.regression.RegressionHeadAngle

@@ -1,0 +1,5 @@
+_target_: models.losses.Losses
+mix: {
+  crossentropy: 1.0,
+  l1 : 1.0,
+}

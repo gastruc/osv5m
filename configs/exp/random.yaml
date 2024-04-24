@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - override /model: random
+  - _self_
+
+class_name: 'country'
+is_baseline: false
+max_epochs: 1
+mode: eval

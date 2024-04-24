@@ -1,0 +1,7 @@
+final_dim: ${eval:'${num_classes}+2'}
+
+instance:
+  _target_: models.networks.heads.hybrid.SharedHybridHead
+
+defaults:
+  - hybrid

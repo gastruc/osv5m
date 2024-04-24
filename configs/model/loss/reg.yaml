@@ -1,0 +1,5 @@
+_target_: models.losses.Losses
+mix: {
+  haversine : 0.0,
+  L1 : 1.0,
+}

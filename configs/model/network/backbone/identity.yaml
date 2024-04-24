@@ -1,0 +1,2 @@
+instance:
+  _target_: torch.nn.Identity

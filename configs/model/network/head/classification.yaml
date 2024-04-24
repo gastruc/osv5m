@@ -1,0 +1,7 @@
+target_key: label
+final_dim:  ${num_classes}
+instance:
+  _target_: models.networks.heads.classification.ClassificationHead
+  id_to_gps:
+    _target_: models.networks.heads.id_to_gps.IdToGPS
+    id_to_gps: ${root_dir}/index_to_gps_unique_${class_name}.pt

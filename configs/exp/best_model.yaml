@@ -1,0 +1,24 @@
+# @package _global_
+
+defaults:
+  - override /dataset: openworld_contrastive_best
+  - override /model: hybrid
+  - override /model/network: best_backbone
+  - override /model/network/backbone: openclip_B_32
+  - override /model/network/mid: mlp_hybrid
+  - override /model/loss: best_model
+  - _self_
+
+class_name: 'quadtree_10_1000'
+is_baseline: false
+max_epochs: 30
+
+model:
+  optimizer:
+    optim:
+      lr: 2e-4
+      weight_decay: 0.0001
+    backbone_lr: 2e-5
+
+dataset:
+  global_batch_size: 2048

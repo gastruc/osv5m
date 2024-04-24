@@ -1,0 +1,12 @@
+optim:
+  _target_: torch.optim.Adam
+  lr: 1e-3
+  betas: [0.9, 0.999]
+  weight_decay: 0.01
+
+exclude_ln_and_biases_from_weight_decay: False
+lora_lr: 1e-4
+backbone_lr: 5e-6
+last_block_lr: 5e-5
+unfreeze_lr: False
+diff_backbone_last: False

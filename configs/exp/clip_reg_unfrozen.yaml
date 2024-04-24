@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - override /model: regression
+  - override /model/network: unfrozen_backbone
+  - override /model/network/backbone: openclip_B_32
+  - _self_
+
+model:
+  optimizer:
+    optim:
+      lr: 2e-4
+      weight_decay: 0.0001
+    backbone_lr: 2e-5
+
+is_baseline: false
+max_epochs: 30

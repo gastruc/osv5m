@@ -1,0 +1,12 @@
+defaults:
+  - backbone: openclip_B_32
+  - mid: mlp_multi
+  - head: multi_task
+
+instance:
+  _target_: models.networks.network.UnfrozenBackbone
+  backbone : ${model.network.backbone}
+  mid: ${model.network.mid}
+  head: ${model.network.head}
+
+class_name: ${class_name}

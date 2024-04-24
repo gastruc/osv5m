@@ -1,0 +1,5 @@
+_target_: models.losses.Losses
+mix: {
+  Text-NCE : 1.0,
+  L1 : 1.0,
+}

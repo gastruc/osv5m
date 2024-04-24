@@ -1,0 +1,8 @@
+target_key: label
+final_dim: ${eval:'${num_classes}*3'}
+instance:
+  _target_: models.networks.heads.hybrid.HybridHeadCentroid
+  final_dim: ${num_classes}
+  use_tanh: true
+  scale_tanh: 1.2
+  quadtree_path: ${root_dir}/${class_name}.csv

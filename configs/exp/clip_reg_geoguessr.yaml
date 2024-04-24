@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - override /model: regression
+  - override /model/network/backbone: clip_L_14
+  - override /model/loss: geoguessr
+  - _self_
+
+max_epochs: 15
+model:
+  optimizer:
+    optim:
+      lr: 0.0003
+      weight_decay: 0.0001

@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - override /model: baselines
+  - _self_
+
+class_name: 'quadtree_10_1000'
+is_baseline: true
+max_epochs: 1
+mode: eval

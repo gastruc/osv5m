@@ -1,0 +1,8 @@
+defaults:
+  - head: id_to_gps
+
+instance:
+  _target_: models.networks.network.NoFeatureBackbone
+  head: ${model.network.head}
+
+class_name: ${class_name}

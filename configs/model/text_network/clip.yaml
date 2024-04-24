@@ -1,0 +1,5 @@
+instance:
+  _target_: models.networks.backbones.TextEncoder
+  path: ${model.network.backbone.instance.path}
+
+class_name: ${class_name}

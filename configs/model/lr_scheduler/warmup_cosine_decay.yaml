@@ -1,0 +1,4 @@
+_partial_: true
+_target_: utils.lr_scheduler.WarmupCosineDecayLR
+warmup_steps: 20000
+total_steps: ${trainer.max_steps}

@@ -1,0 +1,5 @@
+instance:
+  _target_: models.networks.backbones.CLIP
+  path: facebook/metaclip-l14-fullcc2.5b
+
+output_dim: 1024

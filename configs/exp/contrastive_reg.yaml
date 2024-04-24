@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - override /dataset: openworld_contrastive
+  - override /model: regression
+  - override /model/network: contrastive_frozen_backbone
+  - override /model/network/backbone: openclip_B_32
+  - override /model/loss: contrastive
+  - _self_
+
+class_name: country
+is_baseline: false

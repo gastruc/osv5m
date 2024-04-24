@@ -1,0 +1,6 @@
+_target_: models.losses.Losses
+mix: {
+  region_mil : 1.0,
+  hier_quad : 1.0,
+  l2_hybrid : 1.0,
+}

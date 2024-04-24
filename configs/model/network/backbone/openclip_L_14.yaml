@@ -1,0 +1,5 @@
+instance:
+  _target_: models.networks.backbones.CLIP
+  path: laion/CLIP-ViT-L-14-laion2B-s32B-b82K
+
+output_dim: 1024

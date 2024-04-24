@@ -1,0 +1,10 @@
+defaults:
+  - optimizer: adam
+  - lr_scheduler: none
+  - network: frozen_backbone
+  - loss: reg
+  - _self_
+
+name: Regression
+aux_data: ${aux_data}
+text_tuning: ${text_tuning}

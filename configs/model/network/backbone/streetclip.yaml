@@ -1,0 +1,5 @@
+instance:
+  _target_: models.networks.backbones.StreetCLIP
+  path: geolocal/StreetCLIP
+
+output_dim: 768

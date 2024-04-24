@@ -1,0 +1,6 @@
+target_key: gps
+final_dim:  2
+instance:
+  _target_: models.networks.heads.aux.AuxHead
+  aux_data: ${aux_data}
+  use_tanh: true

@@ -1,0 +1,5 @@
+instance:
+  _target_: models.networks.network.HybridFrozenBackbone
+
+defaults:
+  - frozen_backbone

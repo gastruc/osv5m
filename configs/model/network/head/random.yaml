@@ -1,0 +1,5 @@
+instance:
+  _target_: models.networks.heads.random.Random
+  num_output: 2
+
+target_key: gps

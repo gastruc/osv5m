@@ -1,0 +1,10 @@
+defaults:
+  - optimizer: adam
+  - lr_scheduler: none
+  - network: hybrid_frozen_backbone
+  - loss: hybrid
+  - override network/head: hybrid_sharedreg
+  - _self_
+
+name: SharedHybrid
+text_tuning: ${text_tuning}

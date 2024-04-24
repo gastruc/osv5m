@@ -1,0 +1,7 @@
+optim:
+  _target_: models.misc.DoNothingOptimizer
+
+exclude_ln_and_biases_from_weight_decay: false
+lora_lr: 1e-4
+backbone_lr: 2e-5
+unfreeze_lr: False
