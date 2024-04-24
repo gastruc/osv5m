@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="components/carousel.css">
+<link rel="stylesheet" href="components/carousel-2.css">
+<link rel="stylesheet" href="components/carousel-3.css">
+
+<head>
+<title>OSV-5M</title>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+
+<h1>OpenStreetView-5M <br><sub>The Many Roads to Global Visual Geolocation</sub></h1>
+<center>
+  <div class="authors">
+    <a href="https://imagine-lab.enpc.fr/staff-members/guillaume-astruc/">Guillaume&nbspAstruc*<sup>1,2</sup>,</a>
+    <a href="https://nicolas-dufour.github.io/">Nicolas&nbspDufour*</a><sup>1,3</sup>,
+    <a href="https://imagine.enpc.fr/~siglidii/">Ioannis&nbspSiglidis*</a><sup>1</sup>,<br/>
+    <div class="second">
+    Constantin&nbspAronssohn<sup>1</sup>, Nacim&nbspBouia, <a href="https://stephanie-fu.github.io/">Stephanie&nbspFu</a><sup>1,4</sup>,
+    <a href="https://romainloiseau.fr/">Romain&nbspLoiseau</a><sup>1,2</sup>,
+    <a href="https://nv-nguyen.github.io/">Van&nbspNguyen&nbspNguyen</a><sup>1</sup>,
+    <a href="https://imagine.enpc.fr/~raudec/">Charles&nbspRaude</a><sup>1</sup>,
+    <a href="https://imagine.enpc.fr/~vincente/">Elliot&nbspVincent</a><sup>1,3</sup>,
+    Lintao&nbspXU<sup>1</sup>, Hongyu&nbspZhou<sup>1</sup>,
+    <a href="https://loiclandrieu.com/">Loic&nbspLandrieu<sup>1</sup></a></div>
+  </div>
+</center>
+
+<div class="unis">
+<center><sup>1</sup>LIGM,&nbspEcole&nbspdes&nbspPonts,&nbspUniv&nbspGustave&nbspEiffel,&nbspCNRS
+<sup>2</sup>Univ&nbspGustave&nbspEiffel,&nbspIGN,&nbspENSG,&nbspLASTIG
+<sup>3</sup>Inria&nbspParis
+<sup>4</sup>UC&nbspBerkeley
+<sup>5</sup>CESBIO,&nbspUniv&nbspde&nbspToulouse,&nbspCNES/CNRS/IRD/INRAE/UPS
+<sup>6</sup>LIX,&nbspCNRS,&nbspEcole&nbspPolytechnique,&nbspIP&nbspParis
+</center>
+</div>
+
+<h2><div class="cvpr">CVPR 2024 (Poster)</div></h2>
+<div class="publication-links">
+  <span class="link-block">
+    <a href="cvpr.pdf" class="external-link button is-normal is-rounded is-dark">
+      <span class="icon">
+        <i class="fa-regular fa-file-lines" style="margin-right: 0.5rem;"></i> Pdf
+      </span>
+    </a>
+  </span>
+
+  <span class="link-block">
+    <a href="arxiv_link" class="external-link button is-normal is-rounded is-dark">
+      <span class="icon">
+        <i class="ai ai-arxiv"></i> Arxiv
+      </span>
+    </a>
+  </span>
+
+  <span class="link-block">
+    <a href="https://huggingface.co/datasets/osv5m/osv5m" class="external-link button is-normal is-rounded is-dark">
+      <span class="icon">
+        <i class="fa-solid fa-database" style="margin-right: 0.5rem;"></i> Data
+      </span>
+    </a>
+  </span>
+
+  <span class="link-block">
+    <a href="https://github.com/gastruc/osv5m" class="external-link button is-normal is-rounded is-dark">
+      <span class="icon">
+        <i class="fa-brands fa-github" style="margin-right: 0.5rem;"></i> Code
+      </span>
+    </a>
+  </span>
+
+  <span class="link-block">
+    <a href="https://osv5m-plonk.hf.space" class="external-link button is-normal is-rounded is-dark">
+      <span class="icon">
+          📍Play
+      </span>
+    </a>
+  </span>
+</div>
+
+<div class="image-container">
+  <img src="media/teaser.png" alt="Description of the image">
+  <div class="caption">
+    
+  </div>
+</div>
+
+<h2>Abstract</h2>
+<div class="text">
+Determining the location of an image anywhere on Earth is a complex visual task, which makes it particularly relevant for evaluating computer vision algorithms.
+Yet, the absence of standard, large-scale, open-access datasets with reliably <strong>localizable</strong> images has limited its potential.
+To address this issue, we introduce OpenStreetView-5M, a large-scale, open-access dataset comprising over <strong>5.1 million</strong> geo-referenced street view images, covering 225 countries and territories.
+In contrast to existing benchmarks, we enforce a strict train/test separation, allowing us to evaluate the relevance of learned geographical features beyond mere memorization.
+To demonstrate the utility of our dataset, we conduct an extensive benchmark of various state-of-the-art image encoders, spatial representations, and training strategies.
+</div>
+
+<h2>Dataset</h2>
+
+<div class="wrapper">
+  <i id="left" class="fa-solid fa-angle-left"></i>
+  <ul class="carousel">
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/1113744692540897.jpg" alt="Image from Brasil, from user tulliomf" draggable="false">
+        <div class="hover-text">Location: Brasil, tulliomf</div>
+      </div>
+      <span>tulliomf (Brasil)</span>
+    </li>
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/1139006019900435.jpg" alt="Image from Mali, from user kosanka" draggable="false">
+        <div class="hover-text">Location: Mali, kosanka</div>
+      </div>
+      <span>kosanka (Mali)</span>
+    </li>
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/1207955469639614.jpg" alt="Image from Mali, from user benjidad" draggable="false">
+        <div class="hover-text">Location: Indonesia, benjidad</div>
+      </div>
+      <span>benjidad (Indonesia)</span>
+    </li>
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/137033365014320.jpg" alt="Image from Indonesia from user" draggable="false">
+        <div class="hover-text">Location: Indonesia, arizalkawamuna</div>
+      </div>
+      <span>arizalkawamuna (Indonesia)</span>
+    </li>
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/1622455258212885.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Pakistan, plannerqadeer for City Pulse</div>
+      </div>
+      <span>plannerqadeer for City Pulse (Pakistan)</span>
+    </li>
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/210429954039398.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Chile, sedicla</div>
+      </div>
+      <span>sedicla (Chile)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/217887346522004.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Kazakstan, vik1607</div>
+      </div>
+      <span>vik1607 (Kazakstan)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/2872700852992867.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: China, mapillario</div>
+      </div>
+      <span>mapillario (China)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/320105979491109.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Sweden, kmajcher for Here</div>
+      </div>
+      <span>kmajcher for Here (Sweden)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/3882682481821500.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Oman, vbombaerts</div>
+      </div>
+      <span>vbombaerts (Oman)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/464804747946887.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Japan, caesium</div>
+      </div>
+      <span>caesium (Japan)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/474519253765020.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: New Zealand, 3stripes</div>
+      </div>
+      <span>3stripes (New Zealand)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/517681129360654.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: England, themadcabbie</div>
+      </div>
+      <span>themadcabbie (England)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/827026111505364.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Utah, canadarunner</div>
+      </div>
+      <span>canadarunner (Utah)</span>
+    </li> 
+    <li class="card">
+      <div width=100% class="img">
+        <img src="images/975112963027888.jpg" alt="img" draggable="false">
+        <div class="hover-text">Location: Australia, weinshaum</div>
+      </div>
+      <span>weinshaum (Australia)</span>
+    </li> 
+  </ul>
+  <i id="right" class="fa-solid fa-angle-right"></i>
+</div>
+
+<div class="text">
+  Our dataset offers a wide variety of images, from urban to rural areas, well distributed across the globe.  <br>
+  We especially curate our dataset to fit as close as possible the real spatial population density.
+</div>
+<div class="wrapper2">
+  <i id="left" class="fa-solid fa-angle-left"></i>
+  <ul class="carousel2">
+    <li class="card2">
+      <div class="img">
+        <img src="figures/train-density.png" alt="train-density" draggable="false">
+      </div>
+      <span>Train Density</span>
+    </li>
+    <li class="card2">
+      <div class="img">
+        <img src="figures/train-distribution.png" alt="train-distribution" draggable="false">
+      </div>
+      <span>Train Distribution</span>
+    </li>
+    <li class="card2">
+      <div class="img">
+        <img src="figures/test-density.png" alt="test-density" draggable="false">
+      </div>
+      <span>Train Density</span>
+    </li>
+    <li class="card2">
+      <div class="img">
+        <img src="figures/test-distribution.png" alt="test-distribution" draggable="false">
+      </div>
+      <span>Train Distribution</span>
+    </li>
+  </ul>
+  <i id="right" class="fa-solid fa-angle-right"></i>
+</div>
+
+<h2>Play Geoguessr on our dataset!</h2>
+<div class="content">
+  <iframe
+    src="https://osv5m-plonk.hf.space"
+    frameborder="0"
+    width="100%"
+    height="420px"
+    style="margin: 0 auto;"
+    ></iframe>
+</div>
+
+<h2>Benchmark</h2>
+<div class="image-container">
+  <img src="media/benchmark.png" alt="Description of the image">
+  <div class="caption">
+    
+  </div>
+</div>
+
+<div class="wrapper3">
+  <i id="left" class="fa-solid fa-angle-left"></i>
+  <ul class="carousel3">
+    <li class="card3">
+      <div class="img">
+        <img src="figures/train-density.png" alt="img" draggable="false">
+      </div>
+      <span>Train Density</span>
+    </li>
+  </ul>
+  <i id="right" class="fa-solid fa-angle-right"></i>
+</div>
+
+
+
+<h2>Cite Us</h2>
+<pre><code class="language-bibtex">
+  @article{osv-5m,
+    title = {OpenStreetView-5M: The Many Roads to Global Visual Geolocation},
+    author = {Astruc, Guillaume and Dufour, Nicolas and Siglidis, Ioannis
+      and Aronssohn, Constantin and Bouia, Nacim and Fu, Stephanie and Loiseau, Romain
+      and Nguyen, Van Nguyen and Raude, Charles and Vincent, Elliot and Xu, Lintao
+      and Zhou, Hongyu and Landrieu, Loic},
+    journal = {CVPR},
+    year = {2024},
+  }</code><button class="copy-code-button"><i class="fa-regular fa-clone"></i></button>
+</pre>
+<h2>Acknowledgments</h2>
+<p>
+<div class="text">
+OSV-5M was made possible through the generous support of the Mapillary team, which helped us navigate their vast street view image database. Our work was supported by the ANR project READY3D ANR-19-CE23-0007, and the HPC resources of IDRIS under the allocation AD011014719 made by GENCI. We thank Valérie Gouet for her valuable feedback.
+</div>
+</p>
+
+<!-- <h4>Font stolen from Gwern.</h4> -->
+<script>
+  // Add click event listener to each copy code button
+  document.querySelectorAll(".copy-code-button").forEach(function(button) {
+    button.addEventListener("click", function() {
+      // Get the code element
+      var codeElement = this.parentElement.querySelector("code");
+ 
+      // Create a temporary textarea to copy the code
+      var textarea = document.createElement("textarea");
+      textarea.value = codeElement.innerText;
+      document.body.appendChild(textarea);
+ 
+      // Select and copy the code
+      textarea.select();
+      document.execCommand("copy");
+ 
+      // Remove the temporary textarea
+      document.body.removeChild(textarea);
+ 
+      // Change the button text to "Copied!" for a short duration
+      var originalText = this.innerText;
+      this.innerText = "Copied!";
+      setTimeout(function() {
+        button.innerHTML = "<i class=\"fa-regular fa-clone\"></i>";
+      }, 1500);
+    });
+  });
+</script>
+<script src="components\carousel.js"></script>
+<script src="components\carousel-2.js"></script>
+<script src="components\carousel-3.js"></script>
+</body>
+</html>
