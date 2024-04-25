@@ -173,3 +173,5 @@ checkpoints
 /datasets/baselines/
 /datasets/baselines.zip
 /game/results/
+/game/images/
+/game/select.csv
