@@ -1,12 +1,15 @@
-"""Requires gradio==3.44.0"""
+"""Requires gradio==4.27.0"""
 import io
 import shutil 
 import os
+import json
 import uuid
 import time
 import math
+import datetime
 import numpy as np
 
+from uuid import uuid4
 from PIL import Image
 from math import radians, sin, cos, sqrt, asin, exp
 from os.path import join
@@ -18,7 +21,6 @@ mplstyle.use(['fast'])
 import pandas as pd
 
 import gradio as gr
-import wandb
 import reverse_geocoder as rg
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -29,18 +31,17 @@ from geographiclib.geodesic import Geodesic
 from folium import Map, Element, LatLngPopup, Marker, Icon, PolyLine, FeatureGroup
 from folium.map import LayerControl
 from folium.plugins import BeautifyIcon
+from huggingface_hub import CommitScheduler
 
 MPL = False
 IMAGE_FOLDER = './images'
 CSV_FILE = './select.csv'
-RESULTS_DIR = './results'
-WANDB = 'WANDB_API_KEY' in os.environ
+BASE_LOCATION = [0, 23]
 RULES = """<h1>OSV-5M (plonk)</h1>
 <center><img width="256" alt="Rotating globe" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Rotating_globe.gif"></center>
 <h2> Instructions </h2>
 <h3> Click on the map 🗺️ (left) to the location at which you think the image 🖼️ (right) was captured! </h3>
-<h3>⚠️ Your selection is final!</h3>
-<h3> Click next to move to the next image. </h3>
+<h3> Click "Select" to finalize your selection and then "Next" to move to the next image. </h3>
 """
 css = """
 @font-face {
@@ -137,17 +138,20 @@ def inject_javascript(folium_map):
     """
     folium_map.get_root().html.add_child(Element(f'<script>{js}</script>'))
 
+def empty_map():
+    return Map(location=BASE_LOCATION, zoom_start=1)
+
 def make_map_(name="map_name", id="1"):
-    map = Map(location=[39, 23], zoom_start=1)
+    map = Map(location=BASE_LOCATION, zoom_start=1)
     map._name, map._id = name, id
 
     LatLngPopup().add_to(map)
     inject_javascript(map)
     return map
 
-def make_map(name="map_name", id="1"):
+def make_map(name="map_name", id="1", height=500):
     map = make_map_(name, id)
-    fol = Folium(value=map, height=400, visible=False, elem_id='map-fol')
+    fol = Folium(value=map, height=height, visible=False, elem_id='map-fol')
     return fol
 
 def map_js():
@@ -237,12 +241,22 @@ def compute_scores(csv_file):
         df.to_csv(csv_file, index=False)
 
 
+if __name__ == "__main__":
+    JSON_DATASET_DIR = 'results'
+    scheduler = CommitScheduler(
+        repo_id="osv5m/humeval",
+        repo_type="dataset",
+        folder_path=JSON_DATASET_DIR,
+        path_in_repo=f"raw_data",
+        every=2
+    )
+
+
 class Engine(object):
-    def __init__(self, image_folder, csv_file, cache_path, mpl=True, wandb_=False):
+    def __init__(self, image_folder, csv_file, mpl=True):
         self.image_folder = image_folder
         self.csv_file = csv_file
         self.load_images_and_coordinates(csv_file)
-        self.cache_path = cache_path
           
         # Initialize the score and distance lists
         self.index = 0
@@ -253,7 +267,8 @@ class Engine(object):
         self.mpl = mpl
         if mpl:
             self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-        self.wandb = wandb_
+
+        self.tag = str(uuid4()) + datetime.datetime.now().strftime("__%Y_%m_%d_%H_%M_%S")
 
     def load_images_and_coordinates(self, csv_file):
         # Load the CSV
@@ -288,7 +303,7 @@ class Engine(object):
             return pil
         else:
             pred_lon, pred_lat, true_lon, true_lat, click_lon, click_lat = self.info
-            map = Map(location=[39, 23], zoom_start=1)
+            map = Map(location=BASE_LOCATION, zoom_start=1)
             map._name, map._id = 'visu', '1'
 
             icon_star = BeautifyIcon(
@@ -381,7 +396,7 @@ class Engine(object):
         self.stats['distances'].append(distance)
         self.stats['country'].append(int(self.admins[self.index][3] != 'nan' and country == self.admins[self.index][3]))
 
-        df = pd.DataFrame([self.get_model_average(who) for who in ['human', 'best', 'base']], columns=['who', 'GeoScore', 'Distance', 'Accuracy (country)']).round(2)
+        df = pd.DataFrame([self.get_model_average(who) for who in ['user', 'best', 'base']], columns=['who', 'GeoScore', 'Distance', 'Accuracy (country)']).round(2)
         result_text = (f"### GeoScore: {score:.0f}, distance: {distance:.0f} km")
 
         self.cache(self.index+1, score, distance, (click_lat, click_lon), time_elapsed)
@@ -394,7 +409,7 @@ class Engine(object):
 
     def get_model_average(self, which, all=False):
         aux, i = [], self.index+1
-        if which == 'human':
+        if which == 'user':
             avg_score = sum(self.stats['scores']) / len(self.stats['scores']) if self.stats['scores'] else 0
             avg_distance = sum(self.stats['distances']) / len(self.stats['distances']) if self.stats['distances'] else 0
             avg_country_accuracy = (0 if self.df['country_val'].iloc[:i].sum() == 0 else sum(self.stats['country'])/self.df['country_val'].iloc[:i].sum())*100
@@ -408,13 +423,13 @@ class Engine(object):
             avg_distance = np.mean(self.df[['distance_base']].iloc[:i])
             avg_country_accuracy = self.df['accuracy_country_base'].iloc[i]
             if all:
-                aux = [self.df[['accuracy_city_base']].iloc[i], self.df[['accuracy_area_base']].iloc[i], self.df[['accuracy_region_base']].iloc[i]]
+                aux = [self.df['accuracy_city_base'].iloc[i], self.df['accuracy_area_base'].iloc[i], self.df['accuracy_region_base'].iloc[i]]
         elif which == 'best':
             avg_score = np.mean(self.df[['score']].iloc[:i])
             avg_distance = np.mean(self.df[['distance']].iloc[:i])
             avg_country_accuracy = self.df['accuracy_country'].iloc[i]
             if all:
-                aux = [self.df[['accuracy_city_base']].iloc[i], self.df[['accuracy_area_base']].iloc[i], self.df[['accuracy_region_base']].iloc[i]]
+                aux = [self.df['accuracy_city_base'].iloc[i], self.df['accuracy_area_base'].iloc[i], self.df['accuracy_region_base'].iloc[i]]
         return [which, avg_score, avg_distance, avg_country_accuracy] + aux
 
     def update_average_display(self):
@@ -426,56 +441,25 @@ class Engine(object):
         return f"GeoScore: {avg_score:.0f}, Distance: {avg_distance:.0f} km"
     
     def finish(self):
-        click = rg.search(self.stats['clicked_locations'])
-        self.stats['city'] = [(int(self.admins[self.index][0] != 'nan' and click['name'] == self.admins[self.index][0]))]
-        self.stats['area'] = [(int(self.admins[self.index][1] != 'nan' and click['admin2'] == self.admins[self.index][1]))]
-        self.stats['region'] = [(int(self.admins[self.index][2] != 'nan' and click['admin1'] == self.admins[self.index][2]))]
+        clicks = rg.search(self.stats['clicked_locations'])
+        self.stats['city'] = [(int(self.admins[self.index][0] != 'nan' and click['name'] == self.admins[self.index][0])) for click in clicks]
+        self.stats['area'] = [(int(self.admins[self.index][1] != 'nan' and click['admin2'] == self.admins[self.index][1])) for click in clicks]
+        self.stats['region'] = [(int(self.admins[self.index][2] != 'nan' and click['admin1'] == self.admins[self.index][2])) for click in clicks]
         
-        df = pd.DataFrame([self.get_model_average(who, True) for who in ['human', 'best', 'base']], columns=['who', 'GeoScore', 'Distance'])
-        self.cache_final(df)
+        df = pd.DataFrame([self.get_model_average(who, True) for who in ['user', 'best', 'base']], columns=['who', 'GeoScore', 'Distance', 'Accuracy (country)', 'Accuracy (city)', 'Accuracy (area)', 'Accuracy (region)'])
         return df
         
     # Function to save the game state
     def cache(self, index, score, distance, location, time_elapsed):
-        if not os.path.exists(self.cache_path):
-            os.makedirs(self.cache_path)
-
-        with open(join(self.cache_path, str(index).zfill(2) + '.txt'), 'w') as f:
-            print(f"{score}, {distance}, {location[0]}, {location[1]}, {time_elapsed}", file=f)
-
-    # Function to save the game state
-    def cache_final(self, final_results):
-        times = ', '.join(map(str, self.stats['times']))
-        fname = join(self.cache_path, 'full.txt')
-        with open(fname, 'w') as f:
-            print(f"{final_results}" + '\n Times: ' + times, file=f)
-
-        if self.wandb:
-            zip_ = self.cache_path.rstrip('/') + '.zip'
-            archived = shutil.make_archive(self.cache_path.rstrip('/'), 'zip', self.cache_path)
-            try:
-                wandb.init(project="plonk")
-                artifact = wandb.Artifact('results', type='results')
-                artifact.add_file(zip_)
-                wandb.log_artifact(artifact)
-                wandb.finish()
-            except Exception:
-                print("Failed to log results to wandb")
-                pass
-
-            if os.path.isfile(zip_):
-                os.remove(zip_)
-
-def make_page(engine):
-    i = engine.index + 1
-    total = len(engine.images)
-    return f"<h3>{i}/{total}</h3>"
+        with scheduler.lock:
+            os.makedirs(join(JSON_DATASET_DIR, self.tag), exist_ok=True)
+            with open(join(JSON_DATASET_DIR, self.tag, f'{index}.json'), 'w') as f:
+                json.dump({"lat": location[0], "lon": location[1], "time": time_elapsed, "user": self.tag}, f)
+                f.write('\n')
 
 
 if __name__ == "__main__":
     # login with the key from secret
-    if WANDB:
-        wandb.login()
     if 'csv' in os.environ:
         csv_str = os.environ['csv']
         with open(CSV_FILE, 'w') as f:
@@ -490,11 +474,17 @@ if __name__ == "__main__":
         state['clicked'] = True
         image, text, df = state['engine'].click(float(lon), float(lat), country)
         df = df.sort_values(by='GeoScore', ascending=False)
-        return gr.update(visible=False), gr.update(value=image, visible=True), gr.update(value=text, visible=True), gr.update(value=df, visible=True)
+        kargs = {}
+        if not MPL:
+            kargs = {'value': empty_map()}
+        return gr.update(visible=False, **kargs), gr.update(value=image, visible=True), gr.update(value=text, visible=True), gr.update(value=df, visible=True)
 
     def exit_(state):
-        df = state['engine'].finish()
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value='', visible=True), gr.update(value=text), gr.update(visible=False), gr.update(value=df, visible=True), gr.update(value="-1", visible=False), gr.update(text=f"<h1> Your stats on OSV-5M🌍 </h1>", visible=True), gr.update(text='<h3>Thanks for playing ❤️</h3>', visible=True)
+        if state['engine'].index > 0:
+            df = state['engine'].finish()
+            return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value='', visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(value=df, visible=True), gr.update(value="-1", visible=False), gr.update(value="<h1 style='margin-top: 4em;'> Your stats on OSV-5M🌍 </h1>", visible=True), gr.update(value="<h3 style='margin-top: 1em;'>Thanks for playing ❤️</h3>", visible=True), gr.update(visible=False)
+        else:
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
 
     def next_(state):
         if state['clicked']:
@@ -503,20 +493,17 @@ if __name__ == "__main__":
             else:
                 image, text = state['engine'].next_image()
                 state['clicked'] = False
-                return gr.update(value=make_map_(), visible=True), gr.update(visible=False), gr.update(value=image), gr.update(value=text), gr.update(visible=False), gr.update(), gr.update(visible=False), gr.update(value="-1"), gr.update(), gr.update()
+                kargs = {}
+                if not MPL:
+                    kargs = {'value': empty_map()}
+                return gr.update(value=make_map_(), visible=True), gr.update(visible=False, **kargs), gr.update(value=image), gr.update(value=text), gr.update(visible=False), gr.update(), gr.update(visible=False), gr.update(value="-1"), gr.update(), gr.update(), gr.update()
         else:
-            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
 
     def start(state):
         # create a unique random temporary name under CACHE_DIR
         # generate random hex and make sure it doesn't exist under CACHE_DIR
-        while True:
-            path = str(uuid.uuid4().hex)
-            name = os.path.join(RESULTS_DIR, path)
-            if not os.path.exists(name):
-                break
-
-        state['engine'] = Engine(IMAGE_FOLDER, CSV_FILE, name, MPL, WANDB)
+        state['engine'] = Engine(IMAGE_FOLDER, CSV_FILE, MPL)
         state['clicked'] = False
         image, text = state['engine'].load_image()
 
@@ -541,31 +528,27 @@ if __name__ == "__main__":
         exit_button = gr.Button("Exit", visible=False, elem_id='exit_btn')
         start_button = gr.Button("Start", visible=True)
         with gr.Row():
-            map_ = make_map()
+            map_ = make_map(height=512)
             if MPL:
                 results = gr.Image(label='Results', visible=False)
             else:
-                results = Folium(height=400, visible=False)
-            image_ = gr.Image(label='Image', visible=False)
+                results = Folium(height=512, visible=False)
+            image_ = gr.Image(label='Image', visible=False, height=512)
+
         with gr.Row():
             text = gr.Markdown("", visible=False)
             text_count = gr.Markdown("", visible=False)
 
         with gr.Row():
-            # map related
-            select_button = gr.Button("Choose", elem_id='latlon_btn', visible=False)
-            ####
+            select_button = gr.Button("Select", elem_id='latlon_btn', visible=False)
             next_button = gr.Button("Next", visible=False, elem_id='next')
         perf = gr.Dataframe(value=None, visible=False)
         text_end = gr.Markdown("", visible=False)
     
-        # map related
         coords = gr.Textbox(value="-1", label="Latitude, Longitude", visible=False, elem_id='coords-tbox')
-        ####
-
         start_button.click(start, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, rules, state, start_button, coords, select_button])
         select_button.click(click, inputs=[state, coords], outputs=[map_, results, text, perf], js=map_js())
-        next_button.click(next_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end])
-        exit_button.click(exit_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end])
+        next_button.click(next_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end, select_button])
+        exit_button.click(exit_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end, select_button])
 
-    demo.launch(allowed_paths=["custom.ttf"], debug=True)
+    demo.queue().launch(allowed_paths=["custom.ttf"], debug=True)

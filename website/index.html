@@ -48,7 +48,7 @@
 </center>
 </div>
 
-<h2><div class="cvpr">CVPR 2024 (Poster)</div></h2>
+<div class="cvpr"><h2>CVPR 2024 (Poster)</h2></div>
 <div class="publication-links">
   <span class="link-block">
     <a href="cvpr.pdf" class="external-link button is-normal is-rounded is-dark">
@@ -222,9 +222,10 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
 </div>
 
 <div class="text">
-  Our dataset offers a wide variety of images, from urban to rural areas, well distributed across the globe.  <br>
-  We especially curate our dataset to fit as close as possible the real spatial population density.
+  Our dataset offers a wide variety of images, from urban to rural areas, well distributed across the globe.
+  We especially curate our dataset to fit as close as possible the real global spatial population density, with a priority on the test set.
 </div>
+
 <div class="wrapper2">
   <i id="left" class="fa-solid fa-angle-left"></i>
   <ul class="carousel2">
@@ -256,7 +257,7 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
   <i id="right" class="fa-solid fa-angle-right"></i>
 </div>
 
-<h2>Play Geoguessr on our dataset!</h2>
+<!-- <h2>Play Geoguessr on our dataset!</h2>
 <div class="content">
   <iframe
     src="https://osv5m-plonk.hf.space"
@@ -265,14 +266,18 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
     height="420px"
     style="margin: 0 auto;"
     ></iframe>
-</div>
+</div> -->
 
 <h2>Benchmark</h2>
 <div class="image-container">
   <img src="media/benchmark.png" alt="Description of the image">
-  <div class="caption">
-    
+  <div class="caption">    
   </div>
+</div>
+
+<div class="text">
+  We benchmark various state-of-the-art image encoders, spatial representations, and training strategies on our dataset. 
+  We evaluate the relevance of learned geographical features beyond mere memorization.
 </div>
 
 <div class="wrapper3">
@@ -280,10 +285,41 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
   <ul class="carousel3">
     <li class="card3">
       <div class="img">
-        <img src="figures/train-density.png" alt="img" draggable="false">
+        <img src="figures/backbone.png" alt="img" draggable="false">
       </div>
-      <span>Train Density</span>
+      <span>Backbone</span>
     </li>
+    <li class="card3">
+      <div class="img">
+        <img src="figures/optimization.png" alt="img" draggable="false">
+      </div>
+      <span>Optimization</span>
+    </li>
+    <li class="card3">
+      <div class="img">
+        <img src="figures/prediction-head.png" alt="img" draggable="false">
+      </div>
+      <span>Prediction Head</span>
+    </li>
+    <li class="card3">
+      <div class="img">
+        <img src="figures/contrastive.png" alt="img" draggable="false">
+      </div>
+      <span>Contrastive</span>
+    </li>
+    <li class="card3">
+      <div class="img">
+        <img src="figures/error-map.png" alt="img" draggable="false">
+      </div>
+      <span>Error Map</span>
+    </li>
+    <li class="card3">
+      <div class="img">
+        <img src="figures/error-dist.png" alt="img" draggable="false">
+      </div>
+      <span>Error Distribution</span>
+    </li>
+
   </ul>
   <i id="right" class="fa-solid fa-angle-right"></i>
 </div>
@@ -305,7 +341,7 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
 <h2>Acknowledgments</h2>
 <p>
 <div class="text">
-OSV-5M was made possible through the generous support of the Mapillary team, which helped us navigate their vast street view image database. Our work was supported by the ANR project READY3D ANR-19-CE23-0007, and the HPC resources of IDRIS under the allocation AD011014719 made by GENCI. We thank Valérie Gouet for her valuable feedback.
+OSV-5M was made possible through the generous support of the Mapillary team, which helped us navigate their vast street view image database. Our work was supported by the ANR project READY3D ANR-19-CE23-0007, and the HPC resources of IDRIS under the allocation AD011014719 made by GENCI. We thank Valérie Gouet for her valuable feedback and Ségolène Albouy for helping us make gradio-folium clickable (for our demo).
 </div>
 </p>
 

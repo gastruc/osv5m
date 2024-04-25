@@ -2,5 +2,6 @@ matplotlib==3.7.1
 pandas==2.0.1
 reverse_geocoder==1.5.1
 cartopy==0.22.0
-wandb==0.15.4
-gradio-folium=0.0.6
+gradio-folium==0.0.6
+folium==0.16.0
+geographiclib==2.0

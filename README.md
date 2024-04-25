@@ -24,7 +24,7 @@ For different ways of importing the dataset see [DATASET.md](DATASET.md)
 ### Inference 🔥
 Our best model on OSV-5M can also be found on [huggingface](https://huggingface.co/osv5m/baseline).  
 
-```bash
+```python
 from PIL import Image
 from models.huggingface import Geolocalizer
 
