@@ -4,12 +4,14 @@ import shutil
 import os
 import uuid
 import time
+import math
 import numpy as np
 
 from PIL import Image
 from math import radians, sin, cos, sqrt, asin, exp
 from os.path import join
 from collections import defaultdict
+from itertools import tee
 
 import matplotlib.style as mplstyle
 mplstyle.use(['fast'])
@@ -23,13 +25,16 @@ import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 
 from gradio_folium import Folium
-from folium import Map, Element, LatLngPopup
-from matplotlib.offsetbox import AnchoredText
+from geographiclib.geodesic import Geodesic
+from folium import Map, Element, LatLngPopup, Marker, Icon, PolyLine, FeatureGroup
+from folium.map import LayerControl
+from folium.plugins import BeautifyIcon
 
-
+MPL = False
 IMAGE_FOLDER = './images'
 CSV_FILE = './select.csv'
 RESULTS_DIR = './results'
+WANDB = 'WANDB_API_KEY' in os.environ
 RULES = """<h1>OSV-5M (plonk)</h1>
 <center><img width="256" alt="Rotating globe" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Rotating_globe.gif"></center>
 <h2> Instructions </h2>
@@ -98,6 +103,29 @@ document.addEventListener('keypress', shortcuts_exit, false);
 </script>
 """
 
+def sample_points_along_geodesic(start_lat, start_lon, end_lat, end_lon, min_length_km=2000, segment_length_km=5000, num_samples=None):
+    geod = Geodesic.WGS84
+    distance = geod.Inverse(start_lat, start_lon, end_lat, end_lon)['s12']
+    if distance < min_length_km:
+        return [(start_lat, start_lon), (end_lat, end_lon)]
+
+    if num_samples is None:
+        num_samples = min(int(distance / segment_length_km) + 1, 1000)
+    point_distance = np.linspace(0, distance, num_samples)
+    points = []
+    for pd in point_distance:
+        line = geod.InverseLine(start_lat, start_lon, end_lat, end_lon)
+        g_point = line.Position(pd, Geodesic.STANDARD | Geodesic.LONG_UNROLL)
+        points.append((g_point['lat2'], g_point['lon2']))
+    return points
+
+class GeodesicPolyLine(PolyLine):
+    def __init__(self, locations, min_length_km=2000, segment_length_km=1000, num_samples=None, **kwargs):
+        kwargs1 = dict(min_length_km=min_length_km, segment_length_km=segment_length_km, num_samples=num_samples)
+        assert len(locations) == 2, "A polyline must have at least two locations"
+        start, end = locations
+        geodesic_locs = sample_points_along_geodesic(start[0], start[1], end[0], end[1], **kwargs1)
+        super().__init__(geodesic_locs, **kwargs)
 
 def inject_javascript(folium_map):
     js = """
@@ -130,7 +158,7 @@ def map_js():
         if (!latlng) { return; }
         textBox = `${latlng.lat},${latlng.lng}`;
         document.getElementById('coords-tbox').getElementsByTagName('textarea')[0].value = textBox;
-        var a = countryCoder.iso1A2Code([latlng.lat, latlng.lng]);
+        var a = countryCoder.iso1A2Code([latlng.lng, latlng.lat]);
         if (!a) { a = 'nan'; }
         return [a, `${latlng.lat},${latlng.lng},${a}`];
     }
@@ -210,7 +238,7 @@ def compute_scores(csv_file):
 
 
 class Engine(object):
-    def __init__(self, image_folder, csv_file, cache_path):
+    def __init__(self, image_folder, csv_file, cache_path, mpl=True, wandb_=False):
         self.image_folder = image_folder
         self.csv_file = csv_file
         self.load_images_and_coordinates(csv_file)
@@ -222,8 +250,10 @@ class Engine(object):
 
         # Create the figure and canvas only once
         self.fig = plt.Figure(figsize=(10, 6))
-        self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-        self.MIN_LON, self.MAX_LON, self.MIN_LAT, self.MAX_LAT = self.ax.get_extent()
+        self.mpl = mpl
+        if mpl:
+            self.ax = self.fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+        self.wandb = wandb_
 
     def load_images_and_coordinates(self, csv_file):
         # Load the CSV
@@ -250,20 +280,88 @@ class Engine(object):
         return self.images[self.index], '### ' + str(self.index + 1) + '/' + str(len(self.images))
 
     def get_figure(self):
-        img_buf = io.BytesIO()
-        self.fig.savefig(img_buf, format='png', bbox_inches='tight', pad_inches=0, dpi=300)
-        pil = Image.open(img_buf)
-        self.width, self.height = pil.size
-        return pil
+        if self.mpl:
+            img_buf = io.BytesIO()
+            self.fig.savefig(img_buf, format='png', bbox_inches='tight', pad_inches=0, dpi=300)
+            pil = Image.open(img_buf)
+            self.width, self.height = pil.size
+            return pil
+        else:
+            pred_lon, pred_lat, true_lon, true_lat, click_lon, click_lat = self.info
+            map = Map(location=[39, 23], zoom_start=1)
+            map._name, map._id = 'visu', '1'
 
-    def normalize_pixels(self, click_lon, click_lat):
-        return self.MIN_LON + click_lon * (self.MAX_LON-self.MIN_LON) / self.width, self.MIN_LAT + (self.height - click_lat+1) * (self.MAX_LAT-self.MIN_LAT) / self.height
+            icon_star = BeautifyIcon(
+                icon='star',
+                inner_icon_style='color:red;font-size:30px;',
+                background_color='transparent',
+                border_color='transparent',
+            )
+            feature_group = FeatureGroup(name='Ground Truth')
+            Marker(
+                location=[true_lat, true_lon],
+                popup="True location",
+                icon=icon_star,
+            ).add_to(feature_group)
+            map.add_child(feature_group)
+
+            icon_square = BeautifyIcon(
+                icon_shape='rectangle-dot', 
+                border_color='green', 
+                border_width=10,
+            )
+            feature_group_best = FeatureGroup(name='Best Model')
+            Marker(
+                location=[pred_lat, pred_lon],
+                popup="Best Model",
+                icon=icon_square,
+            ).add_to(feature_group_best)
+            GeodesicPolyLine([[true_lat, true_lon], [pred_lat, pred_lon]], color='green').add_to(feature_group_best)
+            map.add_child(feature_group_best)
+
+            icon_circle = BeautifyIcon(
+                icon_shape='circle-dot', 
+                border_color='blue', 
+                border_width=10,
+            )
+            feature_group_user = FeatureGroup(name='User')
+            Marker(
+                location=[click_lat, click_lon],
+                popup="Human",
+                icon=icon_circle,
+            ).add_to(feature_group_user)
+            GeodesicPolyLine([[true_lat, true_lon], [click_lat, click_lon]], color='blue').add_to(feature_group_user)
+            map.add_child(feature_group_user)
+
+            map.add_child(LayerControl())
+
+            return map
 
     def set_clock(self):
         self.time = time.time()
 
     def get_clock(self):
         return time.time() - self.time
+
+    def mpl_style(self, pred_lon, pred_lat, true_lon, true_lat, click_lon, click_lat):
+        if self.mpl:
+            self.ax.clear()
+            self.ax.set_global()
+            self.ax.stock_img()
+            self.ax.add_feature(cfeature.COASTLINE)
+            self.ax.add_feature(cfeature.BORDERS, linestyle=':')
+
+            self.ax.plot(pred_lon, pred_lat, 'gv', transform=ccrs.Geodetic(), label='model')
+            self.ax.plot([true_lon, pred_lon], [true_lat, pred_lat], color='green', linewidth=1, transform=ccrs.Geodetic())
+            self.ax.plot(click_lon, click_lat, 'bo', transform=ccrs.Geodetic(), label='user')
+            self.ax.plot([true_lon, click_lon], [true_lat, click_lat], color='blue', linewidth=1, transform=ccrs.Geodetic())
+            self.ax.plot(true_lon, true_lat, 'rx', transform=ccrs.Geodetic(), label='g.t.')
+            legend = self.ax.legend(ncol=3, loc='lower center') #, bbox_to_anchor=(0.5, -0.15), borderaxespad=0.
+            legend.get_frame().set_alpha(None)
+            self.fig.canvas.draw()
+        else:
+            self.info = [pred_lon, pred_lat, true_lon, true_lat, click_lon, click_lat]
+
 
     def click(self, click_lon, click_lat, country):
         time_elapsed = self.get_clock()
@@ -272,40 +370,18 @@ class Engine(object):
         # convert click_lon, click_lat to lat, lon (given that you have the borders of the image)
         # click_lon and click_lat is in pixels
         # lon and lat is in degrees
-        # click_lon, click_lat = self.normalize_pixels(click_lon, click_lat)
         self.stats['clicked_locations'].append((click_lat, click_lon))
         true_lon, true_lat = self.coordinates[self.index]
         pred_lon, pred_lat = self.preds[self.index]
-
-        self.ax.clear()
-        self.ax.set_global()
-        self.ax.stock_img()
-        self.ax.add_feature(cfeature.COASTLINE)
-        self.ax.add_feature(cfeature.BORDERS, linestyle=':')
-
-        self.ax.plot(pred_lon, pred_lat, 'gv', transform=ccrs.Geodetic(), label='model')
-        self.ax.plot([true_lon, pred_lon], [true_lat, pred_lat], color='green', linewidth=1, transform=ccrs.Geodetic())
-        self.ax.plot(click_lon, click_lat, 'bo', transform=ccrs.Geodetic(), label='user')
-        self.ax.plot([true_lon, click_lon], [true_lat, click_lat], color='blue', linewidth=1, transform=ccrs.Geodetic())
-        self.ax.plot(true_lon, true_lat, 'rx', transform=ccrs.Geodetic(), label='g.t.')
-        legend = self.ax.legend(ncol=3, loc='lower center') #, bbox_to_anchor=(0.5, -0.15), borderaxespad=0.
-        legend.get_frame().set_alpha(None)
-        # legend.get_frame().set_facecolor((1, 1, 1, 0.1))
-        self.fig.canvas.draw()
+        self.mpl_style(pred_lon, pred_lat, true_lon, true_lat, click_lon, click_lat)
 
         distance = haversine(true_lat, true_lon, click_lat, click_lon)
         score = geoscore(distance)
         self.stats['scores'].append(score)
         self.stats['distances'].append(distance)
-
-        # click = rg.search([(click_lat, click_lon)])[0]
-        # self.stats['city'].append(int(self.admins[self.index][0] != 'nan' and click['name'] == self.admins[self.index][0]))
-        # self.stats['area'].append(int(self.admins[self.index][1] != 'nan' and click['admin2'] == self.admins[self.index][1]))
-        # self.stats['region'].append(int(self.admins[self.index][2] != 'nan' and click['admin1'] == self.admins[self.index][2]))
         self.stats['country'].append(int(self.admins[self.index][3] != 'nan' and country == self.admins[self.index][3]))
 
         df = pd.DataFrame([self.get_model_average(who) for who in ['human', 'best', 'base']], columns=['who', 'GeoScore', 'Distance', 'Accuracy (country)']).round(2)
-        print(df)
         result_text = (f"### GeoScore: {score:.0f}, distance: {distance:.0f} km")
 
         self.cache(self.index+1, score, distance, (click_lat, click_lon), time_elapsed)
@@ -337,7 +413,6 @@ class Engine(object):
             avg_score = np.mean(self.df[['score']].iloc[:i])
             avg_distance = np.mean(self.df[['distance']].iloc[:i])
             avg_country_accuracy = self.df['accuracy_country'].iloc[i]
-            print('avg_country_accuracy', avg_country_accuracy)
             if all:
                 aux = [self.df[['accuracy_city_base']].iloc[i], self.df[['accuracy_area_base']].iloc[i], self.df[['accuracy_region_base']].iloc[i]]
         return [which, avg_score, avg_distance, avg_country_accuracy] + aux
@@ -375,20 +450,21 @@ class Engine(object):
         with open(fname, 'w') as f:
             print(f"{final_results}" + '\n Times: ' + times, file=f)
 
-        zip_ = self.cache_path.rstrip('/') + '.zip'
-        archived = shutil.make_archive(self.cache_path.rstrip('/'), 'zip', self.cache_path)
-        try:
-            wandb.init(project="plonk")
-            artifact = wandb.Artifact('results', type='results')
-            artifact.add_file(zip_)
-            wandb.log_artifact(artifact)
-            wandb.finish()
-        except Exception:
-            print("Failed to log results to wandb")
-            pass
+        if self.wandb:
+            zip_ = self.cache_path.rstrip('/') + '.zip'
+            archived = shutil.make_archive(self.cache_path.rstrip('/'), 'zip', self.cache_path)
+            try:
+                wandb.init(project="plonk")
+                artifact = wandb.Artifact('results', type='results')
+                artifact.add_file(zip_)
+                wandb.log_artifact(artifact)
+                wandb.finish()
+            except Exception:
+                print("Failed to log results to wandb")
+                pass
 
-        if os.path.isfile(zip_):
-            os.remove(zip_)
+            if os.path.isfile(zip_):
+                os.remove(zip_)
 
 def make_page(engine):
     i = engine.index + 1
@@ -398,7 +474,8 @@ def make_page(engine):
 
 if __name__ == "__main__":
     # login with the key from secret
-    wandb.login()
+    if WANDB:
+        wandb.login()
     if 'csv' in os.environ:
         csv_str = os.environ['csv']
         with open(CSV_FILE, 'w') as f:
@@ -439,7 +516,7 @@ if __name__ == "__main__":
             if not os.path.exists(name):
                 break
 
-        state['engine'] = Engine(IMAGE_FOLDER, CSV_FILE, name)
+        state['engine'] = Engine(IMAGE_FOLDER, CSV_FILE, name, MPL, WANDB)
         state['clicked'] = False
         image, text = state['engine'].load_image()
 
@@ -465,7 +542,10 @@ if __name__ == "__main__":
         start_button = gr.Button("Start", visible=True)
         with gr.Row():
             map_ = make_map()
-            results = gr.Image(label='Results', visible=False)
+            if MPL:
+                results = gr.Image(label='Results', visible=False)
+            else:
+                results = Folium(height=400, visible=False)
             image_ = gr.Image(label='Image', visible=False)
         with gr.Row():
             text = gr.Markdown("", visible=False)
