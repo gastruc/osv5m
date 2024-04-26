@@ -146,11 +146,11 @@ def vizu(name_new_column, df_train, boundaries):
     version_base=None,
 )
 def main(cfg):
-    data_path = join(cfg.data_dir, "OpenWorld")
+    data_path = join(cfg.data_dir, "osv5m")
     name_new_column = f"quadtree_{cfg.depth}_{cfg.do_split}"
 
     # Create clusters from train images
-    train_fp = join(data_path, "train", f"train.csv")
+    train_fp = join(data_path, f"train.csv")
     df_train = pd.read_csv(train_fp)
 
     qt = QuadTree(df_train, depth=cfg.depth, do_split=cfg.do_split)
@@ -167,7 +167,7 @@ def main(cfg):
     boundaries.to_csv(f"{name_new_column}.csv", index_label="cluster_id")
 
     # Assign test images to clusters
-    test_fp = join(data_path, "test", f"test.csv")
+    test_fp = join(data_path, f"test.csv")
     df_test = pd.read_csv(test_fp)
 
     above_lat = np.expand_dims(df_test["latitude"].to_numpy(), -1) > np.expand_dims(

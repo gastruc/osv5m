@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - override /dataset: openworld_text_contrastive
+  - override /dataset: osv5m_text_contrastive
   - override /model: text_tuning
   - override /model/network/backbone: openclip_B_32
   - _self_

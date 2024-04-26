@@ -211,7 +211,7 @@ def collate_fn_contrastive_density(batch):
     return output
 
 
-class OpenWorld(Dataset):
+class osv5m(Dataset):
     csv_dtype = {"category": str, "country": str, "city": str}  # Don't remove.
 
     def __init__(
@@ -463,7 +463,7 @@ class OpenWorld(Dataset):
         return len(self.df)
 
 
-class ContrastiveOpenWorld(OpenWorld):
+class Contrastiveosv5m(osv5m):
     def __init__(
         self,
         path,
@@ -560,7 +560,7 @@ class ContrastiveOpenWorld(OpenWorld):
         return output
 
 
-class TextContrastiveOpenWorld(OpenWorld):
+class TextContrastiveosv5m(osv5m):
     def __init__(
         self,
         path,

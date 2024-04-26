@@ -1,7 +1,7 @@
 defaults:
   - model: default
   - computer: v100
-  - dataset: openworld
+  - dataset: osv5m
   - _self_
   - exp: ???
 

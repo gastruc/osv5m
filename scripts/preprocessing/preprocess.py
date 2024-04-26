@@ -146,12 +146,12 @@ def vizu(name_new_column, df_train, boundaries, save_path):
     version_base=None,
 )
 def main(cfg):
-    data_path = join(cfg.data_dir, "OpenWorld")
+    data_path = join(cfg.data_dir, "osv5m")
     save_path = cfg.data_dir
     name_new_column = f"quadtree_{cfg.depth}_{cfg.do_split}"
 
     # Create clusters from train images
-    train_fp = join(data_path, "train", f"train.csv")
+    train_fp = join(data_path, f"train.csv")
     df_train = pd.read_csv(train_fp, low_memory=False)
 
     qt = QuadTree(df_train, depth=cfg.depth, do_split=cfg.do_split)
@@ -170,7 +170,7 @@ def main(cfg):
     )
 
     # Assign test images to clusters
-    test_fp = join(data_path, "test", f"test.csv")
+    test_fp = join(data_path, f"test.csv")
     df_test = pd.read_csv(test_fp)
 
     above_lat = np.expand_dims(df_test["latitude"].to_numpy(), -1) > np.expand_dims(
@@ -206,7 +206,7 @@ def main(cfg):
         df_train.to_csv(train_fp, index=False)
         df_test.to_csv(test_fp, index=False)
 
-    df = pd.read_csv(join(data_path, "train/train.csv"), low_memory=False).fillna("NaN")
+    df = pd.read_csv(join(data_path, "train.csv"), low_memory=False).fillna("NaN")
     # Compute the average location for each unique country
     country_avg = (
         df.groupby("unique_country")[["latitude", "longitude"]].mean().reset_index()
@@ -261,7 +261,7 @@ def main(cfg):
             pd.concat(
                 [
                     pd.read_csv(
-                        join(data_path, split, f"{split}.csv"), low_memory=False
+                        join(data_path, f"{split}.csv"), low_memory=False
                     )[class_name]
                     for split in splits
                 ]
@@ -294,7 +294,7 @@ def main(cfg):
         output_file = join(save_path, "index_to_gps_" + class_name + ".pt")
         torch.save(dictionary, output_file)
 
-    train = pd.read_csv(join(data_path, "train/train.csv"), low_memory=False).fillna(
+    train = pd.read_csv(join(data_path, "train.csv"), low_memory=False).fillna(
         "NaN"
     )
 

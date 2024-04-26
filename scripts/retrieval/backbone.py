@@ -42,7 +42,7 @@ def load_plonk(path):
 
     # load config from path
     # make path relative to current_dir
-    with initialize(version_base=None, config_path="OpenWorld_new__best_model"):
+    with initialize(version_base=None, config_path="osv5m__best_model"):
         cfg = compose(config_name="config", overrides=[])
 
     checkpoint = torch.load(join(path, "last.ckpt"))
