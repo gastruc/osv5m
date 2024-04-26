@@ -44,7 +44,7 @@ if __name__ == "__main__":
     csv_dtype = {"category": str, "country": str, "city": str}
     for split in ["train", "test"]:
         fp = join(
-            dirname(dirname(__file__)), "datasets", "OpenWorld", split, f"{split}.csv"
+            dirname(dirname(__file__)), "datasets", "osv5m", f"{split}.csv"
         )
 
         # Read the CSV file into a pandas DataFrame

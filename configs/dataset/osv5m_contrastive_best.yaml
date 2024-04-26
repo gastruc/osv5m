@@ -3,13 +3,13 @@ defaults:
   - test_transform: fast_clip
   - _self_
 
-name: OpenWorld_new
+name: osv5m
 global_batch_size: 256
 
 train_dataset:
   _partial_: true
-  _target_: data.data.ContrastiveOpenWorld
-  path: ${data_dir}/OpenWorld/
+  _target_: data.data.Contrastiveosv5m
+  path: ${data_dir}/osv5m/
   split: train
   class_name: ${class_name}
   transforms: ${dataset.train_transform}
@@ -18,8 +18,8 @@ train_dataset:
 
 val_dataset:
   _partial_: true
-  _target_: data.data.ContrastiveOpenWorld
-  path: ${data_dir}/OpenWorld/
+  _target_: data.data.Contrastiveosv5m
+  path: ${data_dir}/osv5m/
   split: val
   class_name: ${class_name}
   transforms: ${dataset.test_transform}
@@ -28,8 +28,8 @@ val_dataset:
 
 test_dataset:
   _partial_: true
-  _target_: data.data.ContrastiveOpenWorld
-  path: ${data_dir}/OpenWorld/
+  _target_: data.data.Contrastiveosv5m
+  path: ${data_dir}/osv5m/
   split: test
   class_name: ${class_name}
   transforms: ${dataset.test_transform}

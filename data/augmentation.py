@@ -203,7 +203,7 @@ if __name__ == "__main__":
     )
     augmentation_config.names = "standard_augmentation,geometric_augmentation"
     augmentation_transform = instantiate(augmentation_config)
-    img_paths = glob.glob("./datasets/OpenWorld/test/images/*.jpg")
+    img_paths = glob.glob("./datasets/osv5m/test/images/*.jpg")
 
     num_try = 20
     num_try_per_image = 8

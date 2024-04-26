@@ -91,9 +91,9 @@ def extract(qt):
 
 if __name__ == "__main__":
     # merge into one DataFrame
-    data_path = join(dirname(dirname(__file__)), "datasets", "OpenWorld")
-    train_fp = join(data_path, "train", f"train.csv")
-    test_fp = join(data_path, "test", f"test.csv")
+    data_path = join(dirname(dirname(__file__)), "datasets", "osv5m")
+    train_fp = join(data_path, f"train.csv")
+    test_fp = join(data_path, f"test.csv")
 
     df_train = pd.read_csv(train_fp)
     df_train["split"] = "train"

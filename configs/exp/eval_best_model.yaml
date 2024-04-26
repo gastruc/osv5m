@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - override /dataset: openworld_contrastive_best
+  - override /dataset: osv5m_contrastive_best
   - override /model: hybrid
   - override /model/network: best_backbone
   - override /model/network/backbone: clip_L_14_DataComp

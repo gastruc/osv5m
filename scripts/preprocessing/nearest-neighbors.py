@@ -11,7 +11,7 @@ from transformers import AutoImageProcessor, AutoModel
 from transformers import CLIPProcessor, CLIPModel
 from transformers import pipeline
 
-from data.data import OpenWorld
+from data.data import osv5m
 from json_stream import streamable_list
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -86,8 +86,8 @@ if __name__ == "__main__":
             # open existing json and read as dictionary
             json_path_ = join(json_path, f"{split}.json")
 
-            dataset = OpenWorld(
-                "datasets/OpenWorld", transforms=None, split=split, dont_split=True
+            dataset = osv5m(
+                "datasets/osv5m", transforms=None, split=split, dont_split=True
             )
 
             @torch.no_grad()

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     fast_clip_transform = instantiate(fast_clip_config)
     clip_transform = ClipTransform(None)
 
-    img_paths = glob.glob("./datasets/OpenWorld/test/images/*.jpg")
+    img_paths = glob.glob("./datasets/osv5m/test/images/*.jpg")
     original_imgs, re_implemted_imgs, diff = [], [], []
 
     for i in range(16):
