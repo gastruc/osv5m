@@ -2,11 +2,8 @@
 <html>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="components/carousel.css">
-<link rel="stylesheet" href="components/carousel-2.css">
-<link rel="stylesheet" href="components/carousel-3.css">
 
 <head>
 <title>OSV-5M</title>
@@ -16,6 +13,7 @@
 <script type="text/javascript"
   src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <link rel="icon" type="image/png" href="favicon.png">
 </head>
 
@@ -48,7 +46,7 @@
 </center>
 </div>
 
-<div class="cvpr"><h2>CVPR 2024 (Poster)</h2></div>
+<div class="cvpr", style="margin-top: 0.2em;"><h2>CVPR 2024 (Poster)</h2></div>
 <div class="publication-links">
   <span class="link-block">
     <a href="cvpr.pdf" class="external-link button is-normal is-rounded is-dark">
@@ -109,222 +107,255 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
 
 <h2>Dataset</h2>
 
-<div class="wrapper">
-  <i id="left" class="fa-solid fa-angle-left"></i>
-  <ul class="carousel">
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/1113744692540897.jpg" alt="Image from Brasil, from user tulliomf" draggable="false">
-        <div class="hover-text">Location: Brasil, tulliomf</div>
+<div id="carouselExampleDark" class="carousel slide" style="margin-bottom: 2em;">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="4" aria-label="Slide 5"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="5" aria-label="Slide 6"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="6" aria-label="Slide 7"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="7" aria-label="Slide 8"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="8" aria-label="Slide 9"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="9" aria-label="Slide 10"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="10" aria-label="Slide 11"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="11" aria-label="Slide 12"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="12" aria-label="Slide 13"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="13" aria-label="Slide 14"></button>
+    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="14" aria-label="Slide 15"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active" data-bs-interval="10000">
+      <img src="images/1113744692540897.jpg" class="d-block w-100" alt="Image from Brasil, from user tulliomf">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>tulliomf (Brasil)</p>
       </div>
-      <span>tulliomf (Brasil)</span>
-    </li>
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/1139006019900435.jpg" alt="Image from Mali, from user kosanka" draggable="false">
-        <div class="hover-text">Location: Mali, kosanka</div>
+    </div>
+    <div class="carousel-item" data-bs-interval="2000">
+      <img src="images/1139006019900435.jpg" class="d-block w-100" alt="Image from Mali, from user kosanka">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>kosanka (Mali)</p>
       </div>
-      <span>kosanka (Mali)</span>
-    </li>
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/1207955469639614.jpg" alt="Image from Mali, from user benjidad" draggable="false">
-        <div class="hover-text">Location: Indonesia, benjidad</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/1207955469639614.jpg" class="d-block w-100" alt="Image from Indonesia, from user benjidad">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>benjidad (Indonesia)</p>
       </div>
-      <span>benjidad (Indonesia)</span>
-    </li>
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/137033365014320.jpg" alt="Image from Indonesia from user" draggable="false">
-        <div class="hover-text">Location: Indonesia, arizalkawamuna</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/137033365014320.jpg" class="d-block w-100" alt="Image from Indonesia, from user arizalkawamuna">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>arizalkawamuna (Indonesia)</p>
       </div>
-      <span>arizalkawamuna (Indonesia)</span>
-    </li>
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/1622455258212885.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Pakistan, plannerqadeer for City Pulse</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/1622455258212885.jpg" class="d-block w-100" alt="Image from Pakistan, from user plannerqadeer for City Pulse">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>plannerqadeer for City Pulse (Pakistan)</p>
       </div>
-      <span>plannerqadeer for City Pulse (Pakistan)</span>
-    </li>
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/210429954039398.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Chile, sedicla</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/210429954039398.jpg" class="d-block w-100" alt="Image from Chile, from user sedicla">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>sedicla (Chile)</p>
       </div>
-      <span>sedicla (Chile)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/217887346522004.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Kazakstan, vik1607</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/217887346522004.jpg" class="d-block w-100" alt="Image from Kazakstan, from user vik1607">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>vik1607 (Kazakstan)</p>
       </div>
-      <span>vik1607 (Kazakstan)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/2872700852992867.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: China, mapillario</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/2872700852992867.jpg" class="d-block w-100" alt="Image from China, from user mapillario">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>mapillario (China)</p>
       </div>
-      <span>mapillario (China)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/320105979491109.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Sweden, kmajcher for Here</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/320105979491109.jpg" class="d-block w-100" alt="Image from Sweden, from user kmajcher for Here">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>kmajcher for Here (Sweden)</p>
       </div>
-      <span>kmajcher for Here (Sweden)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/3882682481821500.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Oman, vbombaerts</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/3882682481821500.jpg" class="d-block w-100" alt="Image from Oman, from user vbombaerts">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>vbombaerts (Oman)</p>
       </div>
-      <span>vbombaerts (Oman)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/464804747946887.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Japan, caesium</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/464804747946887.jpg" class="d-block w-100" alt="Image from Japan, from user caesium">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>caesium (Japan)</p>
       </div>
-      <span>caesium (Japan)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/474519253765020.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: New Zealand, 3stripes</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/474519253765020.jpg" class="d-block w-100" alt="Image from New Zealand, from user 3stripes">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>3stripes (New Zealand)</p>
       </div>
-      <span>3stripes (New Zealand)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/517681129360654.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: England, themadcabbie</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/517681129360654.jpg" class="d-block w-100" alt="Image from England, from user themadcabbie">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>themadcabbie (England)</p>
       </div>
-      <span>themadcabbie (England)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/827026111505364.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Utah, canadarunner</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/827026111505364.jpg" class="d-block w-100" alt="Image from Utah, from user canadarunner">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>canadarunner (Utah)</p>
       </div>
-      <span>canadarunner (Utah)</span>
-    </li> 
-    <li class="card">
-      <div width=100% class="img">
-        <img src="images/975112963027888.jpg" alt="img" draggable="false">
-        <div class="hover-text">Location: Australia, weinshaum</div>
+    </div>
+    <div class="carousel-item">
+      <img src="images/975112963027888.jpg" class="d-block w-100" alt="Image from Australia, from user weinshaum">
+      <div class="carousel-caption d-none d-md-block" style="color: white;">
+        <p>weinshaum (Australia)</p>
       </div>
-      <span>weinshaum (Australia)</span>
-    </li> 
-  </ul>
-  <i id="right" class="fa-solid fa-angle-right"></i>
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true" style="color: white;"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true" style="color: white;"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
 </div>
 
 <div class="text">
   Our dataset offers a wide variety of images, from urban to rural areas, well distributed across the globe.
   We especially curate our dataset to fit as close as possible the real global spatial population density, with a priority on the test set.
+  We enforce a train and test spatial separation (1km) and sequence-wise. 
+  This means that the network cannot rely on recognizing places to locate images, but must learn geographical cues to recognize countries and regions. 
 </div>
 
-<div class="wrapper2">
-  <i id="left" class="fa-solid fa-angle-left"></i>
-  <ul class="carousel2">
-    <li class="card2">
-      <div class="img">
-        <img src="figures/train-density.png" alt="train-density" draggable="false">
+<div id="carousel2" class="carousel carousel-dark slide" style="margin-bottom: 2em;">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carousel2" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carousel2" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carousel2" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    <button type="button" data-bs-target="#carousel2" data-bs-slide-to="3" aria-label="Slide 4"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active" data-bs-interval="10000">
+      <img src="figures/train-density.png" alt="train density" class="d-block w-100">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Train Density</p>
       </div>
-      <span>Train Density</span>
-    </li>
-    <li class="card2">
-      <div class="img">
-        <img src="figures/train-distribution.png" alt="train-distribution" draggable="false">
+    </div>
+    <div class="carousel-item" data-bs-interval="2000">
+      <img src="figures/train-distribution.png" class="d-block w-100" alt="train distribution">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Train Distribution</p>
       </div>
-      <span>Train Distribution</span>
-    </li>
-    <li class="card2">
-      <div class="img">
-        <img src="figures/test-density.png" alt="test-density" draggable="false">
+    </div>
+    <div class="carousel-item">
+      <img src="figures/test-density.png" class="d-block w-100" alt="test density">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Test Density</p>
       </div>
-      <span>Train Density</span>
-    </li>
-    <li class="card2">
-      <div class="img">
-        <img src="figures/test-distribution.png" alt="test-distribution" draggable="false">
+    </div>
+    <div class="carousel-item">
+      <img src="figures/test-distribution.png" class="d-block w-100" alt="test distribution">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Test Distribution</p>
       </div>
-      <span>Train Distribution</span>
-    </li>
-  </ul>
-  <i id="right" class="fa-solid fa-angle-right"></i>
+   </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carousel2" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carousel2" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
 </div>
-
-<!-- <h2>Play Geoguessr on our dataset!</h2>
-<div class="content">
-  <iframe
-    src="https://osv5m-plonk.hf.space"
-    frameborder="0"
-    width="100%"
-    height="420px"
-    style="margin: 0 auto;"
-    ></iframe>
-</div> -->
 
 <h2>Benchmark</h2>
-<div class="image-container">
+<div class="image-container" style="margin-bottom: 1em;">
   <img src="media/benchmark.png" alt="Description of the image">
   <div class="caption">    
   </div>
 </div>
 
-<div class="text">
+<div class="text" style="margin-top: 2em; margin-bottom: 2em;">
   We benchmark various state-of-the-art image encoders, spatial representations, and training strategies on our dataset. 
   We evaluate the relevance of learned geographical features beyond mere memorization.
 </div>
 
-<div class="wrapper3">
-  <i id="left" class="fa-solid fa-angle-left"></i>
-  <ul class="carousel3">
-    <li class="card3">
-      <div class="img">
-        <img src="figures/backbone.png" alt="img" draggable="false">
+<div id="carousel3" class="carousel carousel-dark slide" style="margin-bottom: 2em;">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carousel3" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carousel3" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carousel3" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    <button type="button" data-bs-target="#carousel3" data-bs-slide-to="3" aria-label="Slide 4"></button>
+    <button type="button" data-bs-target="#carousel3" data-bs-slide-to="4" aria-label="Slide 5"></button>
+    <button type="button" data-bs-target="#carousel3" data-bs-slide-to="5" aria-label="Slide 6"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active" data-bs-interval="10000">
+      <img src="figures/backbone.png" alt="backbone" class="d-block w-100">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Backbone</p>
       </div>
-      <span>Backbone</span>
-    </li>
-    <li class="card3">
-      <div class="img">
-        <img src="figures/optimization.png" alt="img" draggable="false">
+    </div>
+    <div class="carousel-item" data-bs-interval="2000">
+      <img src="figures/optimization.png" class="d-block w-100" alt=Finetuning">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Finetuning</p>
       </div>
-      <span>Optimization</span>
-    </li>
-    <li class="card3">
-      <div class="img">
-        <img src="figures/prediction-head.png" alt="img" draggable="false">
+    </div>
+    <div class="carousel-item">
+      <img src="figures/prediction-head.png" class="d-block w-100" alt="prediction head">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Prediction Head</p>
       </div>
-      <span>Prediction Head</span>
-    </li>
-    <li class="card3">
-      <div class="img">
-        <img src="figures/contrastive.png" alt="img" draggable="false">
+    </div>
+    <div class="carousel-item">
+      <img src="figures/contrastive.png" class="d-block w-100" alt="contrastive">
+      <div class="carousel-caption d-none d-md-block">
+        <p>Contrastive</p>
       </div>
-      <span>Contrastive</span>
-    </li>
-    <li class="card3">
-      <div class="img">
-        <img src="figures/error-map.png" alt="img" draggable="false">
-      </div>
-      <span>Error Map</span>
-    </li>
-    <li class="card3">
-      <div class="img">
-        <img src="figures/error-dist.png" alt="img" draggable="false">
-      </div>
-      <span>Error Distribution</span>
-    </li>
-
-  </ul>
-  <i id="right" class="fa-solid fa-angle-right"></i>
+   </div>
+   <div class="carousel-item">
+    <img src="figures/error-map.png" class="d-block w-100" alt="error map">
+    <div class="carousel-caption d-none d-md-block">
+      <p>Error Map</p>
+    </div>
+   </div>
+   <div class="carousel-item">
+    <img src="figures/error-dist.png" class="d-block w-100" alt="error distribution">
+    <div class="carousel-caption d-none d-md-block">
+      <p>Error Distribution</p>
+    </div>
+   </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carousel3" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carousel3" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
 </div>
 
-
+<h3>Key Takeaways</h3>
+<div class="text" style="text-align: left;">
+<ul>
+<li><b>Backbone:</b> Pretraining is on par with increasing parameters with less cost.</li>
+<li><b>Prediction Heads:</b> Classifying with cell partitions (quadtrees) instead of administrative regions leads to higher performance. Hybrid classification-then-regression performs best.</li>
+<li><b>Finetuning:</b> Unfreezing the last transformer block is both more efficient and faster to train than using LoRA, suggesting that the pretrained models can extract relevant patch embeddings: only the way to combine them needs to be adapted for geolocation. Of course, fine-tuning the entire image encoder improves results even more.</li>
+<li><b>Contrastive:</b> Using regions to define the positive pairs in the contrastive loss outperforms text/image contrastive approaches.</li>
+<li><b>Overall:</b >Combining all best designs throughout our experiments leads to a strong visual geolocation baseline.</li>
+</ul>
+</div>
 
 <h2>Cite Us</h2>
 <pre><code class="language-bibtex">
@@ -374,8 +405,5 @@ OSV-5M was made possible through the generous support of the Mapillary team, whi
     });
   });
 </script>
-<script src="components\carousel.js"></script>
-<script src="components\carousel-2.js"></script>
-<script src="components\carousel-3.js"></script>
 </body>
 </html>

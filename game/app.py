@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 
 from gradio_folium import Folium
 from geographiclib.geodesic import Geodesic
-from folium import Map, Element, LatLngPopup, Marker, Icon, PolyLine, FeatureGroup
+from folium import Map, Element, LatLngPopup, Marker, PolyLine, FeatureGroup
 from folium.map import LayerControl
 from folium.plugins import BeautifyIcon
 from huggingface_hub import CommitScheduler
@@ -37,11 +37,19 @@ MPL = False
 IMAGE_FOLDER = './images'
 CSV_FILE = './select.csv'
 BASE_LOCATION = [0, 23]
-RULES = """<h1>OSV-5M (plonk)</h1>
-<center><img width="256" alt="Rotating globe" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Rotating_globe.gif"></center>
-<h2> Instructions </h2>
-<h3> Click on the map 🗺️ (left) to the location at which you think the image 🖼️ (right) was captured! </h3>
-<h3> Click "Select" to finalize your selection and then "Next" to move to the next image. </h3>
+RULES = """<h1 style="margin-bottom: 0.5em">OSV-5M (plonk)</h1>
+<center style="margin-bottom: 1em; margin-top: 1em"><img width="256" alt="Rotating globe" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Rotating_globe.gif"></center>
+<h2 style="margin-top: 0.5em"> Instructions </h2>
+<h3> Click on the map 🗺️ (left) to the location at which you think the image 🖼️ (right) was captured!</h3>
+<h3 style="margin-bottom: 0.5em"> Click "Select" to finalize your selection and then "Next" to move to the next image.</h3>
+
+<h2> AI Competitors </h2>
+<h3> You will compete against two AIs: <b>Plonk-AI</b> (our best model) and Baseline-AI (a simpler approach).</h3>
+<h3> These AIs have not been trained on any of the images you will see; in fact, they haven't seen anything within a <b>1km radius</b> of them.</h3>
+<h3 style="margin-bottom: 0.5em"> Like you, the AIs will need to pick up on geographic clues to pinpoint the locations of the images.</h3>
+
+<h2> Geoscore </h2>
+<h3> The geoscore is calculated based on how close each guess is to the true location as in Geoguessr, with a maximum of <b>5000 points: $$\\large g(d) = 5000 \\exp\\left(\\frac{-d}{1492.7}\\right)$$ </h3>
 """
 css = """
 @font-face {
@@ -53,6 +61,7 @@ h1 {
     text-align: center;
     display:block;
     font-family: custom;
+    font-size: 3.2em;
 }
 img {
     text-align: center;
@@ -62,17 +71,26 @@ h2 {
     text-align: center;
     display:block;
     font-family: custom;
+    font-size: 2.2em;
 }
 h3 {
     text-align: center;
     display:block;
     font-family: custom;
     font-weight: normal;
+    font-size: 1.5em;
+}
+
+.MathJax {
+    font-size: 1.5em;
 }
 """
 
 space_js = """
 <script src="https://cdn.jsdelivr.net/npm/@rapideditor/country-coder@5.2/dist/country-coder.iife.min.js"></script>
+<script type="text/javascript"
+  src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 <script>
 function shortcuts(e) {
     var event = document.all ? window.event : e;
@@ -159,7 +177,7 @@ def map_js():
     (a, textBox) => {
         const iframeMap = document.getElementById('map-fol').getElementsByTagName('iframe')[0];
         const latlng = iframeMap.contentWindow.state_data;
-        if (!latlng) { return; }
+        if (!latlng) { return [-1, -1]; }
         textBox = `${latlng.lat},${latlng.lng}`;
         document.getElementById('coords-tbox').getElementsByTagName('textarea')[0].value = textBox;
         var a = countryCoder.iso1A2Code([latlng.lng, latlng.lat]);
@@ -273,6 +291,10 @@ class Engine(object):
     def load_images_and_coordinates(self, csv_file):
         # Load the CSV
         df = pd.read_csv(csv_file)
+        # Put image with id 732681614433401 on the top and then all the rest below
+        df['id'] = df['id'].astype(str)
+        df = pd.concat([df[df['id'] == '495204901603170'], df[df['id'] != '495204901603170']])
+        df = pd.concat([df[df['id'] == '732681614433401'], df[df['id'] != '732681614433401']])
 
         # Get the image filenames and their coordinates
         self.images = [os.path.join(self.image_folder, f"{img_path}.jpg") for img_path in df['id'].tolist()[:]]
@@ -306,24 +328,18 @@ class Engine(object):
             map = Map(location=BASE_LOCATION, zoom_start=1)
             map._name, map._id = 'visu', '1'
 
-            icon_star = BeautifyIcon(
-                icon='star',
-                inner_icon_style='color:red;font-size:30px;',
-                background_color='transparent',
-                border_color='transparent',
-            )
             feature_group = FeatureGroup(name='Ground Truth')
             Marker(
                 location=[true_lat, true_lon],
                 popup="True location",
-                icon=icon_star,
+                icon_color='red',
             ).add_to(feature_group)
             map.add_child(feature_group)
 
             icon_square = BeautifyIcon(
                 icon_shape='rectangle-dot', 
                 border_color='green', 
-                border_width=10,
+                border_width=5,
             )
             feature_group_best = FeatureGroup(name='Best Model')
             Marker(
@@ -337,7 +353,7 @@ class Engine(object):
             icon_circle = BeautifyIcon(
                 icon_shape='circle-dot', 
                 border_color='blue', 
-                border_width=10,
+                border_width=5,
             )
             feature_group_user = FeatureGroup(name='User')
             Marker(
@@ -397,7 +413,15 @@ class Engine(object):
         self.stats['country'].append(int(self.admins[self.index][3] != 'nan' and country == self.admins[self.index][3]))
 
         df = pd.DataFrame([self.get_model_average(who) for who in ['user', 'best', 'base']], columns=['who', 'GeoScore', 'Distance', 'Accuracy (country)']).round(2)
-        result_text = (f"### GeoScore: {score:.0f}, distance: {distance:.0f} km")
+        result_text = (
+            f"### <span style='color:blue'>GeoScore: %s, Distance: %s km <b style='color:blue'>(You)</b></span></br><span style='color:green'>GeoScore: %s, Distance: %s km <b style='color:green'>(Plonk-AI)</b></span>" % (
+                round(score, 2),
+                round(distance, 2),
+                round(self.df['score'].iloc[self.index], 2),
+                round(self.df['distance'].iloc[self.index], 2)
+            )
+        )
+        # You: }   \green{OSV-Bot:  GeoScore: XX, distance: XX
 
         self.cache(self.index+1, score, distance, (click_lat, click_lon), time_elapsed)
         return self.get_figure(), result_text, df
@@ -407,29 +431,32 @@ class Engine(object):
         self.index += 1
         return self.load_image()
 
-    def get_model_average(self, which, all=False):
-        aux, i = [], self.index+1
+    def get_model_average(self, which, all=False, final=False):
+        aux, i = [], self.index
         if which == 'user':
             avg_score = sum(self.stats['scores']) / len(self.stats['scores']) if self.stats['scores'] else 0
             avg_distance = sum(self.stats['distances']) / len(self.stats['distances']) if self.stats['distances'] else 0
-            avg_country_accuracy = (0 if self.df['country_val'].iloc[:i].sum() == 0 else sum(self.stats['country'])/self.df['country_val'].iloc[:i].sum())*100
+            avg_country_accuracy = (0 if self.df['country_val'].iloc[:i+1].sum() == 0 else sum(self.stats['country'])/self.df['country_val'].iloc[:i+1].sum())*100
             if all:
-                avg_city_accuracy = (0 if self.df['city_val'].iloc[:i].sum() == 0 else sum(self.stats['city'])/self.df['city_val'].iloc[:i].sum())*100
-                avg_area_accuracy = (0 if self.df['area_val'].iloc[:i].sum() == 0 else sum(self.stats['area'])/self.df['area_val'].iloc[:i].sum())*100
-                avg_region_accuracy = (0 if self.df['region_val'].iloc[:i].sum() == 0 else sum(self.stats['region'])/self.df['region_val'].iloc[:i].sum())*100
+                avg_city_accuracy = (0 if self.df['city_val'].iloc[:i+1].sum() == 0 else sum(self.stats['city'])/self.df['city_val'].iloc[:i+1].sum())*100
+                avg_area_accuracy = (0 if self.df['area_val'].iloc[:i+1].sum() == 0 else sum(self.stats['area'])/self.df['area_val'].iloc[:i+1].sum())*100
+                avg_region_accuracy = (0 if self.df['region_val'].iloc[:i+1].sum() == 0 else sum(self.stats['region'])/self.df['region_val'].iloc[:i+1].sum())*100
                 aux = [avg_city_accuracy, avg_area_accuracy, avg_region_accuracy]
+            which = 'You'
         elif which == 'base':
-            avg_score = np.mean(self.df[['score_base']].iloc[:i])
-            avg_distance = np.mean(self.df[['distance_base']].iloc[:i])
+            avg_score = np.mean(self.df[['score_base']].iloc[:i+1])
+            avg_distance = np.mean(self.df[['distance_base']].iloc[:i+1])
             avg_country_accuracy = self.df['accuracy_country_base'].iloc[i]
             if all:
                 aux = [self.df['accuracy_city_base'].iloc[i], self.df['accuracy_area_base'].iloc[i], self.df['accuracy_region_base'].iloc[i]]
+            which = 'Baseline-AI'
         elif which == 'best':
-            avg_score = np.mean(self.df[['score']].iloc[:i])
-            avg_distance = np.mean(self.df[['distance']].iloc[:i])
+            avg_score = np.mean(self.df[['score']].iloc[:i+1])
+            avg_distance = np.mean(self.df[['distance']].iloc[:i+1])
             avg_country_accuracy = self.df['accuracy_country'].iloc[i]
             if all:
                 aux = [self.df['accuracy_city_base'].iloc[i], self.df['accuracy_area_base'].iloc[i], self.df['accuracy_region_base'].iloc[i]]
+            which = 'Plonk-AI'
         return [which, avg_score, avg_distance, avg_country_accuracy] + aux
 
     def update_average_display(self):
@@ -446,7 +473,7 @@ class Engine(object):
         self.stats['area'] = [(int(self.admins[self.index][1] != 'nan' and click['admin2'] == self.admins[self.index][1])) for click in clicks]
         self.stats['region'] = [(int(self.admins[self.index][2] != 'nan' and click['admin1'] == self.admins[self.index][2])) for click in clicks]
         
-        df = pd.DataFrame([self.get_model_average(who, True) for who in ['user', 'best', 'base']], columns=['who', 'GeoScore', 'Distance', 'Accuracy (country)', 'Accuracy (city)', 'Accuracy (area)', 'Accuracy (region)'])
+        df = pd.DataFrame([self.get_model_average(who, True, True) for who in ['user', 'best', 'base']], columns=['who', 'GeoScore', 'Distance', 'Accuracy (country)', 'Accuracy (city)', 'Accuracy (area)', 'Accuracy (region)'])
         return df
         
     # Function to save the game state
@@ -469,7 +496,7 @@ if __name__ == "__main__":
     import gradio as gr
     def click(state, coords):
         if coords == '-1' or state['clicked']:
-            return gr.update(), gr.update(), gr.update(), gr.update()
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
         lat, lon, country = coords.split(',')
         state['clicked'] = True
         image, text, df = state['engine'].click(float(lon), float(lat), country)
@@ -477,7 +504,7 @@ if __name__ == "__main__":
         kargs = {}
         if not MPL:
             kargs = {'value': empty_map()}
-        return gr.update(visible=False, **kargs), gr.update(value=image, visible=True), gr.update(value=text, visible=True), gr.update(value=df, visible=True)
+        return gr.update(visible=False, **kargs), gr.update(value=image, visible=True), gr.update(value=text, visible=True), gr.update(value=df, visible=True), gr.update(visible=False), gr.update(visible=True),
 
     def exit_(state):
         if state['engine'].index > 0:
@@ -496,7 +523,7 @@ if __name__ == "__main__":
                 kargs = {}
                 if not MPL:
                     kargs = {'value': empty_map()}
-                return gr.update(value=make_map_(), visible=True), gr.update(visible=False, **kargs), gr.update(value=image), gr.update(value=text), gr.update(visible=False), gr.update(), gr.update(visible=False), gr.update(value="-1"), gr.update(), gr.update(), gr.update()
+                return gr.update(value=make_map_(), visible=True), gr.update(visible=False, **kargs), gr.update(value=image), gr.update(value=text, visible=True), gr.update(value='', visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(value="-1"), gr.update(), gr.update(), gr.update(visible=True)
         else:
             return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
 
@@ -513,7 +540,7 @@ if __name__ == "__main__":
             gr.update(value=image, visible=True),
             gr.update(value=text, visible=True),
             gr.update(visible=True),
-            gr.update(visible=True),
+            gr.update(visible=False),
             gr.update(value="<h1>OSV-5M (plonk)</h1>"),
             gr.update(visible=False),
             gr.update(visible=False),
@@ -542,12 +569,12 @@ if __name__ == "__main__":
         with gr.Row():
             select_button = gr.Button("Select", elem_id='latlon_btn', visible=False)
             next_button = gr.Button("Next", visible=False, elem_id='next')
-        perf = gr.Dataframe(value=None, visible=False)
+        perf = gr.Dataframe(value=None, visible=False, label='Average Performance')
         text_end = gr.Markdown("", visible=False)
     
         coords = gr.Textbox(value="-1", label="Latitude, Longitude", visible=False, elem_id='coords-tbox')
         start_button.click(start, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, rules, state, start_button, coords, select_button])
-        select_button.click(click, inputs=[state, coords], outputs=[map_, results, text, perf], js=map_js())
+        select_button.click(click, inputs=[state, coords], outputs=[map_, results, text, perf, select_button, next_button], js=map_js())
         next_button.click(next_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end, select_button])
         exit_button.click(exit_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end, select_button])
 
