@@ -188,14 +188,14 @@ main {
   align-items: center;
   display: inline-flex;
   justify-content: center;
-  height: 1.5rem;
-  width: 1.5rem
+  height: 1.3rem;
+  width: 1.3rem
 }
 
 .publication-links {
   display: flex;
   justify-content: center;
-  margin-top: 3rem;
+  margin-top: 2rem;
   gap: 0rem; /* Add space between elements */
   margin-bottom: 3rem;
 }

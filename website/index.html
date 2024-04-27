@@ -19,7 +19,7 @@
 
 <body>
 
-<h1>OpenStreetView-5M <br><sub>The Many Roads to Global Visual Geolocation</sub></h1>
+<h1>OpenStreetView-5M <br><sub style="margin-top: -2em; margin-bottom: 0em">The Many Roads to Global Visual Geolocation</sub></h1>
 <center>
   <div class="authors">
     <a href="https://imagine-lab.enpc.fr/staff-members/guillaume-astruc/">Guillaume&nbspAstruc*<sup>1,2</sup>,</a>
@@ -46,10 +46,10 @@
 </center>
 </div>
 
-<div class="cvpr", style="margin-top: 0.2em;"><h2>CVPR 2024 (Poster)</h2></div>
+<div class="cvpr" style="margin-top: -1em; margin-bottom: 0em"><h2>CVPR 2024 (Poster)</h2></div>
 <div class="publication-links">
   <span class="link-block">
-    <a href="cvpr.pdf" class="external-link button is-normal is-rounded is-dark">
+    <a href="cvpr-static.pdf" class="external-link button is-normal is-rounded is-dark">
       <span class="icon">
         <i class="fa-regular fa-file-lines" style="margin-right: 0.5rem;"></i> Pdf
       </span>
@@ -227,11 +227,11 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
   </button>
 </div>
 
-<div class="text">
+<div class="text" style="margin-top: 2em; margin-bottom: 2em;">
   Our dataset offers a wide variety of images, from urban to rural areas, well distributed across the globe.
   We especially curate our dataset to fit as close as possible the real global spatial population density, with a priority on the test set.
-  We enforce a train and test spatial separation (1km) and sequence-wise. 
-  This means that the network cannot rely on recognizing places to locate images, but must learn geographical cues to recognize countries and regions. 
+  We enforce a train and test spatial separation (1km) and keep only one image per capture sequence.
+  This means that the network cannot simply rely on memorizing places in order to geolocate images, but has to learn geographical features that represent countries and regions. 
 </div>
 
 <div id="carousel2" class="carousel carousel-dark slide" style="margin-bottom: 2em;">
@@ -285,8 +285,8 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
 </div>
 
 <div class="text" style="margin-top: 2em; margin-bottom: 2em;">
-  We benchmark various state-of-the-art image encoders, spatial representations, and training strategies on our dataset. 
-  We evaluate the relevance of learned geographical features beyond mere memorization.
+  We benchmark various state-of-the-art image encoders, output representations, training losses, and parameter finetuning strategies on our dataset. 
+  By selecting the best performing components from each step, we propose a strong baseline for visual geolocation on OSV-5M.
 </div>
 
 <div id="carousel3" class="carousel carousel-dark slide" style="margin-bottom: 2em;">
@@ -346,18 +346,17 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
   </button>
 </div>
 
-<h3>Key Takeaways</h3>
+<h3 style="margin-top: 1em;">Key Takeaways</h3>
 <div class="text" style="text-align: left;">
 <ul>
-<li><b>Backbone:</b> Pretraining is on par with increasing parameters with less cost.</li>
+<li><b>Backbone:</b> Pretraining with the correct data can lead to the same performance as significantly increasing the number of parameters, but with significantly less cost.</li>
 <li><b>Prediction Heads:</b> Classifying with cell partitions (quadtrees) instead of administrative regions leads to higher performance. Hybrid classification-then-regression performs best.</li>
-<li><b>Finetuning:</b> Unfreezing the last transformer block is both more efficient and faster to train than using LoRA, suggesting that the pretrained models can extract relevant patch embeddings: only the way to combine them needs to be adapted for geolocation. Of course, fine-tuning the entire image encoder improves results even more.</li>
+<li><b>Finetuning:</b> While full finetuning gives the best performance, unfreezing the last transformer block is both more efficient and faster to train than using LoRA, suggesting that the pretrained models can extract relevant early features: only the way of combining them is what needs to be adapted for geolocation.</li>
 <li><b>Contrastive:</b> Using regions to define the positive pairs in the contrastive loss outperforms text/image contrastive approaches.</li>
-<li><b>Overall:</b >Combining all best designs throughout our experiments leads to a strong visual geolocation baseline.</li>
 </ul>
 </div>
 
-<h2>Cite Us</h2>
+<h2 style="margin-top: 1em;">Cite Us</h2>
 <pre><code class="language-bibtex">
   @article{osv-5m,
     title = {OpenStreetView-5M: The Many Roads to Global Visual Geolocation},
@@ -369,10 +368,11 @@ To demonstrate the utility of our dataset, we conduct an extensive benchmark of 
     year = {2024},
   }</code><button class="copy-code-button"><i class="fa-regular fa-clone"></i></button>
 </pre>
-<h2>Acknowledgments</h2>
+
+<h2 style="margin-top: 1em;">Acknowledgments</h2>
 <p>
 <div class="text">
-OSV-5M was made possible through the generous support of the Mapillary team, which helped us navigate their vast street view image database. Our work was supported by the ANR project READY3D ANR-19-CE23-0007, and the HPC resources of IDRIS under the allocation AD011014719 made by GENCI. We thank Valérie Gouet for her valuable feedback and Ségolène Albouy for helping us make gradio-folium clickable (for our demo).
+OSV-5M was made possible through the generous support of the Mapillary team, which helped us navigate their vast street view image database. Our work was supported by the ANR project READY3D ANR-19-CE23-0007, and the HPC resources of IDRIS under the allocation AD011014719 made by GENCI. We thank Valérie Gouet for her valuable feedback and Ségolène Albouy for helping us make gradio-folium clickable <b>(!)</b>.
 </div>
 </p>
 

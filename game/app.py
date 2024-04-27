@@ -1,11 +1,8 @@
 """Requires gradio==4.27.0"""
 import io
-import shutil 
 import os
 import json
-import uuid
 import time
-import math
 import datetime
 import numpy as np
 
@@ -40,16 +37,15 @@ BASE_LOCATION = [0, 23]
 RULES = """<h1 style="margin-bottom: 0.5em">OSV-5M (plonk)</h1>
 <center style="margin-bottom: 1em; margin-top: 1em"><img width="256" alt="Rotating globe" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Rotating_globe.gif"></center>
 <h2 style="margin-top: 0.5em"> Instructions </h2>
-<h3> Click on the map 🗺️ (left) to the location at which you think the image 🖼️ (right) was captured!</h3>
-<h3 style="margin-bottom: 0.5em"> Click "Select" to finalize your selection and then "Next" to move to the next image.</h3>
+<h3 style="margin-bottom: 0.5em"> Click on the map 🗺️ (left) to the location at which you think the image 🖼️ (right) was captured!<br>Click "Select" to finalize your selection and then "Next" to move to the next image.</h3>
 
 <h2> AI Competitors </h2>
-<h3> You will compete against two AIs: <b>Plonk-AI</b> (our best model) and Baseline-AI (a simpler approach).</h3>
-<h3> These AIs have not been trained on any of the images you will see; in fact, they haven't seen anything within a <b>1km radius</b> of them.</h3>
-<h3 style="margin-bottom: 0.5em"> Like you, the AIs will need to pick up on geographic clues to pinpoint the locations of the images.</h3>
+<h3 style="margin-bottom: 0.5em"> You will compete against two AIs: <b>Plonk-AI</b> (our best model) and Baseline-AI (a simpler approach).<br> These AIs have not been trained on any of the images you will see; in fact, they haven't seen anything within a <b>1km radius</b> of them.<br> Like you, the AIs will need to pick up on geographic clues to pinpoint the locations of the images.</h3>
 
 <h2> Geoscore </h2>
-<h3> The geoscore is calculated based on how close each guess is to the true location as in Geoguessr, with a maximum of <b>5000 points: $$\\large g(d) = 5000 \\exp\\left(\\frac{-d}{1492.7}\\right)$$ </h3>
+<h3> The geoscore is calculated based on how close each guess is to the true location as in Geoguessr, with a maximum of <b>5000 points:</b> 
+<center style="margin-bottom: 0em; margin-top: 1em"><img src="https://latex.codecogs.com/svg.image?g(d)=5000\exp\left(\\frac{-d}{1492.7}\\right)"></img></center>
+
 """
 css = """
 @font-face {
@@ -88,9 +84,6 @@ h3 {
 
 space_js = """
 <script src="https://cdn.jsdelivr.net/npm/@rapideditor/country-coder@5.2/dist/country-coder.iife.min.js"></script>
-<script type="text/javascript"
-  src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
 <script>
 function shortcuts(e) {
     var event = document.all ? window.event : e;
@@ -578,4 +571,4 @@ if __name__ == "__main__":
         next_button.click(next_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end, select_button])
         exit_button.click(exit_, inputs=[state], outputs=[map_, results, image_, text_count, text, next_button, perf, coords, rules, text_end, select_button])
 
-    demo.queue().launch(allowed_paths=["custom.ttf"], debug=True)
+    demo.queue().launch(allowed_paths=["custom.ttf", "geoscore.gif"], debug=True)
