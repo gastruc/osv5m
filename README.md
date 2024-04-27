@@ -1,7 +1,7 @@
 ![teaser.png](./.media/teaser.png)
 # OpenStreetView-5M <br><sub>The Many Roads to Global Visual Geolocation 📍🌍</sub>
 
-Official PyTorch implementation of [OpenStreetView-5M: The Many Roads to Global Visual Geolocation](https://imagine.enpc.fr/~guillaume-astruc/osv-5m).  
+Official PyTorch implementation of [OpenStreetView-5M: The Many Roads to Global Visual Geolocation](https://imagine.enpc.fr/~ioannis.siglidis/osv5m/).  
 
 **First authors:** [Guillaume Astruc](https://gastruc.github.io/), [Nicolas Dufour](https://nicolas-dufour.github.io/), [Ioannis Siglidis](https://imagine.enpc.fr/~siglidii/)  
 **Second authors:** [Constantin Aronssohn](), Nacim Bouia, [Stephanie Fu](https://stephanie-fu.github.io/), [Romain Loiseau](https://romainloiseau.fr/), [Van Nguyen Nguyen](https://nv-nguyen.github.io/), [Charles Raude](https://imagine.enpc.fr/~raudec/), [Elliot Vincent](https://imagine.enpc.fr/~vincente/), Lintao XU, Hongyu Zhou  
@@ -12,7 +12,7 @@ Official PyTorch implementation of [OpenStreetView-5M: The Many Roads to Global 
 OpenStreetView-5M is the first large-scale open geolocation benchmark of streetview images.  
 To get a sense of the difficulty of the benchmark, you can play our [demo](https://huggingface.co/spaces/osv5m/plonk).  
 Our dataset was used in an extensive benchmark of which we provide the best model.  
-For more details and results, please check out our [paper](arxiv) and [project page](https://imagine.enpc.fr/~guillaume-astruc/osv-5m).  
+For more details and results, please check out our [paper](arxiv) and [project page](https://imagine.enpc.fr/~ioannis.siglidis/osv5m/).  
 
 ### Dataset 💾
 OpenStreetView-5M is hosted at [huggingface/datasets/osv5m/osv5m](https://huggingface.co/datasets/osv5m/osv5m). To download and extract it run:
